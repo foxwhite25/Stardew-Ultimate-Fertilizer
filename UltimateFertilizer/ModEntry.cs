@@ -38,7 +38,7 @@ namespace UltimateFertilizer {
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e) {
             // get Generic Mod Config Menu's API (if it's installed)
-            _config = new Config();
+            _config = Helper.ReadConfig<Config>();
 
             var configMenu = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
             if (configMenu is null) {
