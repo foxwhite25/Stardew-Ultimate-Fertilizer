@@ -52,11 +52,13 @@ namespace UltimateFertilizer {
                 save: () => Helper.WriteConfig(_config)
             );
 
-            configMenu.AddParagraph(mod: ModManifest, text: () => "Toggles");
+            configMenu.AddSectionTitle(mod: ModManifest, text: () => "Toggles");
             configMenu.AddBoolOption(
                 mod: ModManifest,
                 name: () => "Enable Multi Fertilizer",
-                tooltip: () => "Allow you to apply multiple types of fertilizer to a crop space.",
+                tooltip: () =>
+                    "Allow you to apply multiple types of fertilizer to a crop space.\n" +
+                    "Config only apply when you use fertilizer, this means if your map already have mixed fertilizer, they still works.",
                 getValue: () => _config.EnableMultiFertilizer,
                 setValue: value => _config.EnableMultiFertilizer = value
             );
@@ -64,7 +66,9 @@ namespace UltimateFertilizer {
                 mod: ModManifest,
                 name: () => "Enable Multi Same Type Fertilizer",
                 tooltip: () =>
-                    "Allow you to apply multiple same type of fertilizer to a crop space and stack their bonus.\nRequires Enable Multi Fertilizer to work.",
+                    "Allow you to apply multiple same type of fertilizer to a crop space and stack their bonus.\n" +
+                    "Config only apply when you use fertilizer, this means if your map already have mixed fertilizer, they still works.\n" +
+                    "Requires Enable Multi Fertilizer to work.",
                 getValue: () => _config.EnableMultiSameFertilizer,
                 setValue: value => _config.EnableMultiSameFertilizer = value
             );
@@ -76,7 +80,7 @@ namespace UltimateFertilizer {
                 setValue: value => _config.EnableAlwaysFertilizer = value
             );
 
-            configMenu.AddParagraph(mod: ModManifest, text: () => "Speed Fertilizer");
+            configMenu.AddSectionTitle(mod: ModManifest, text: () => "Speed Fertilizer");
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Speed-Gro Bonus",
@@ -99,7 +103,7 @@ namespace UltimateFertilizer {
                 setValue: value => _config.FertilizerSpeedBoost[2] = value
             );
 
-            configMenu.AddParagraph(mod: ModManifest, text: () => "Quality Fertilizer");
+            configMenu.AddSectionTitle(mod: ModManifest, text: () => "Quality Fertilizer");
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Basic Fertilizer Bonus",
@@ -122,7 +126,7 @@ namespace UltimateFertilizer {
                 setValue: value => _config.FertilizerQualityBoost[2] = value
             );
 
-            configMenu.AddParagraph(mod: ModManifest, text: () => "Water Fertilizer");
+            configMenu.AddSectionTitle(mod: ModManifest, text: () => "Water Fertilizer");
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Basic Retaining Soil Bonus",
@@ -195,11 +199,11 @@ namespace UltimateFertilizer {
                         : HoeDirtFertilizerApplyStatus.HasThisFertilizer;
                     return false;
                 }
-                
+
                 if (ContainSameTypes(__instance, fertilizerId)) {
                     __result = HoeDirtFertilizerApplyStatus.HasThisFertilizer;
                 }
-                
+
                 return false;
             }
         }
