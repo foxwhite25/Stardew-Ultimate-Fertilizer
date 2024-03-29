@@ -20,9 +20,10 @@ namespace UltimateFertilizer {
             public bool EnableAlwaysFertilizer = true;
             public bool EnableMultiSameFertilizer;
 
-            public readonly List<float> FertilizerSpeedBoost = new() {0.1f, 0.25f, 0.33f};
-            public readonly List<int> FertilizerQualityBoost = new() {1, 2, 3};
-            public readonly List<float> FertilizerWaterRetentionBoost = new() {0.33f, 0.66f, 1.0f};
+            // ReSharper disable FieldCanBeMadeReadOnly.Local
+            public List<float> FertilizerSpeedBoost = new() {0.1f, 0.25f, 0.33f};
+            public List<int> FertilizerQualityBoost = new() {1, 2, 3};
+            public List<float> FertilizerWaterRetentionBoost = new() {0.33f, 0.66f, 1.0f};
         }
 
         private static Config _config = null!;
@@ -37,7 +38,6 @@ namespace UltimateFertilizer {
         }
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e) {
-            // get Generic Mod Config Menu's API (if it's installed)
             _config = Helper.ReadConfig<Config>();
 
             var configMenu = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
