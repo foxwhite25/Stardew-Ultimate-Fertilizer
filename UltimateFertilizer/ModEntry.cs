@@ -18,7 +18,7 @@ namespace UltimateFertilizer {
         private class Config {
             public bool EnableMultiFertilizer = true;
             public bool EnableAlwaysFertilizer = true;
-            public bool EnableMultiSameFertilizer;
+            public string SameFertilizerMode = "Disable";
 
             // ReSharper disable FieldCanBeMadeReadOnly.Local
             public List<float> FertilizerSpeedBoost = new() {0.1f, 0.25f, 0.33f};
@@ -32,14 +32,13 @@ namespace UltimateFertilizer {
             _harmony = new Harmony(ModManifest.UniqueID);
             _logger = Monitor;
             _harmony.PatchAll();
+            _config = Helper.ReadConfig<Config>();
             helper.Events.GameLoop.GameLaunched += OnGameLaunched!;
 
             Monitor.Log("Plugin is now working.", LogLevel.Info);
         }
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e) {
-            _config = Helper.ReadConfig<Config>();
-
             var configMenu = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
             if (configMenu is null) {
                 return;
@@ -62,15 +61,19 @@ namespace UltimateFertilizer {
                 getValue: () => _config.EnableMultiFertilizer,
                 setValue: value => _config.EnableMultiFertilizer = value
             );
-            configMenu.AddBoolOption(
-                mod: ModManifest,
-                name: () => "Enable Multi Same Type Fertilizer",
+            configMenu.AddTextOption(
+                mod: this.ModManifest,
+                name: () => "Multi Same Type Fertilizer Mode",
+                getValue: () => _config.SameFertilizerMode,
                 tooltip: () =>
-                    "Allow you to apply multiple same type of fertilizer to a crop space and stack their bonus.\n" +
+                    "Allow you to choice what happen when you apply multiple same type of fertilizer to a crop space.\n" +
+                    "Replace: the fertilizer you use would replace the current one without refund, effectively a upgrade or downgrade.\n" +
+                    "Stack: same type of fertilizer stack their bonus, applying a 10% and a 25% gives you a 35% bonus.\n" +
+                    "Disable: You can not apply fertilizer if it's the same type.\n" +
                     "Config only apply when you use fertilizer, this means if your map already have mixed fertilizer, they still works.\n" +
-                    "Requires Enable Multi Fertilizer to work.",
-                getValue: () => _config.EnableMultiSameFertilizer,
-                setValue: value => _config.EnableMultiSameFertilizer = value
+                    "Requires Enable Multi Fertilizer to do anything.",
+                setValue: value => _config.SameFertilizerMode = value,
+                allowedValues: new[] {"Replace", "Stack", "Disable"}
             );
             configMenu.AddBoolOption(
                 mod: ModManifest,
@@ -167,9 +170,10 @@ namespace UltimateFertilizer {
             }
 
             private static bool ContainSameTypes(HoeDirt dirt, string fertilizerId) {
-                return ContainSameType(FertilizerSpeed, fertilizerId, dirt.fertilizer.Value)
-                       || ContainSameType(FertilizerWaterRetention, fertilizerId, dirt.fertilizer.Value)
-                       || ContainSameType(FertilizerQuality, fertilizerId, dirt.fertilizer.Value);
+                return Fertilizers.Any(
+                    fertilizer =>
+                        ContainSameType(fertilizer, fertilizerId, dirt.fertilizer.Value)
+                );
             }
 
             public static bool Prefix(
@@ -200,7 +204,7 @@ namespace UltimateFertilizer {
                     return false;
                 }
 
-                if (ContainSameTypes(__instance, fertilizerId)) {
+                if (_config.SameFertilizerMode == "Disable" && ContainSameTypes(__instance, fertilizerId)) {
                     __result = HoeDirtFertilizerApplyStatus.HasThisFertilizer;
                 }
 
@@ -225,12 +229,29 @@ namespace UltimateFertilizer {
                     return false;
                 }
 
+                itemId = ItemRegistry.QualifyItemId(itemId) ?? itemId;
+
                 if (__instance.fertilizer.Value is {Length: > 0}) {
-                    __instance.fertilizer.Value += "|";
-                    __instance.fertilizer.Value += ItemRegistry.QualifyItemId(itemId) ?? itemId;
+                    void DoApply() {
+                        if (_config.SameFertilizerMode == "Replace") {
+                            var fertilizerList = Fertilizers.Find(list => list.Contains(itemId));
+                            if (fertilizerList != null) {
+                                foreach (var s in fertilizerList) {
+                                    __instance.fertilizer.Value = __instance.fertilizer.Value.Replace(s, itemId);
+                                }
+
+                                return;
+                            }
+                        }
+
+                        __instance.fertilizer.Value += "|";
+                        __instance.fertilizer.Value += itemId;
+                    }
+
+                    DoApply();
                 }
                 else {
-                    __instance.fertilizer.Value = ItemRegistry.QualifyItemId(itemId) ?? itemId;
+                    __instance.fertilizer.Value = itemId;
                 }
 
                 __instance.applySpeedIncreases(who);
@@ -243,6 +264,17 @@ namespace UltimateFertilizer {
         private static readonly List<string> FertilizerSpeed = new() {
             HoeDirt.speedGroQID, HoeDirt.superSpeedGroQID, HoeDirt.hyperSpeedGroQID
         };
+
+        private static readonly List<string> FertilizerQuality = new() {
+            HoeDirt.fertilizerLowQualityQID, HoeDirt.fertilizerHighQualityQID, HoeDirt.fertilizerDeluxeQualityQID
+        };
+
+        private static readonly List<string> FertilizerWaterRetention = new() {
+            HoeDirt.waterRetentionSoilQID, HoeDirt.waterRetentionSoilQualityQID, HoeDirt.waterRetentionSoilDeluxeQID
+        };
+
+        private static readonly List<List<string>> Fertilizers = new()
+            {FertilizerSpeed, FertilizerQuality, FertilizerWaterRetention};
 
         [HarmonyPatch(typeof(HoeDirt), "GetFertilizerSpeedBoost")]
         public static class GetFertilizerSpeedBoost {
@@ -262,9 +294,6 @@ namespace UltimateFertilizer {
             }
         }
 
-        private static readonly List<string> FertilizerQuality = new() {
-            HoeDirt.fertilizerLowQualityQID, HoeDirt.fertilizerHighQualityQID, HoeDirt.fertilizerDeluxeQualityQID
-        };
 
         [HarmonyPatch(typeof(HoeDirt), "GetFertilizerQualityBoostLevel")]
         public static class GetFertilizerQualityBoostLevel {
@@ -283,10 +312,6 @@ namespace UltimateFertilizer {
                 return false;
             }
         }
-
-        private static readonly List<string> FertilizerWaterRetention = new() {
-            HoeDirt.waterRetentionSoilQID, HoeDirt.waterRetentionSoilQualityQID, HoeDirt.waterRetentionSoilDeluxeQID
-        };
 
         [HarmonyPatch(typeof(HoeDirt), "GetFertilizerWaterRetentionChance")]
         public static class GetFertilizerWaterRetentionChance {
