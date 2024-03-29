@@ -22,8 +22,13 @@ namespace UltimateFertilizer {
 
             // ReSharper disable FieldCanBeMadeReadOnly.Local
             public List<float> FertilizerSpeedBoost = new() {0.1f, 0.25f, 0.33f};
+            public List<int> FertilizerSpeedAmount = new() {5, 5, 1};
+
             public List<int> FertilizerQualityBoost = new() {1, 2, 3};
+            public List<int> FertilizerQualityAmount = new() {1, 2, 5};
+
             public List<float> FertilizerWaterRetentionBoost = new() {0.33f, 0.66f, 1.0f};
+            public List<int> FertilizerWaterRetentionAmount = new() {1, 2, 1};
         }
 
         private static Config _config = null!;
@@ -83,6 +88,7 @@ namespace UltimateFertilizer {
                 setValue: value => _config.EnableAlwaysFertilizer = value
             );
 
+            configMenu.AddSectionTitle(mod: ModManifest, text: () => "(RES) means restart required");
             configMenu.AddSectionTitle(mod: ModManifest, text: () => "Speed Fertilizer");
             configMenu.AddNumberOption(
                 mod: ModManifest,
@@ -104,6 +110,27 @@ namespace UltimateFertilizer {
                 tooltip: () => "Modify the speed bonus from Hyper Speed-Gro, by default 33% (0.33)",
                 getValue: () => _config.FertilizerSpeedBoost[2],
                 setValue: value => _config.FertilizerSpeedBoost[2] = value
+            );
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => "Speed-Gro Amount (RES)",
+                tooltip: () => "Modify the amount of Speed-Gro you get per craft, by default 5",
+                getValue: () => _config.FertilizerSpeedAmount[0],
+                setValue: value => _config.FertilizerSpeedAmount[0] = value
+            );
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => "Deluxe Speed-Gro Amount (RES)",
+                tooltip: () => "Modify the amount of Deluxe Speed-Gro you get per craft, by default 5",
+                getValue: () => _config.FertilizerSpeedAmount[1],
+                setValue: value => _config.FertilizerSpeedAmount[1] = value
+            );
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => "Hyper Speed-Gro Amount (RES)",
+                tooltip: () => "Modify the amount of Hyper Speed-Gro you get per craft, by default 1",
+                getValue: () => _config.FertilizerSpeedAmount[2],
+                setValue: value => _config.FertilizerSpeedAmount[2] = value
             );
 
             configMenu.AddSectionTitle(mod: ModManifest, text: () => "Quality Fertilizer");
@@ -127,6 +154,27 @@ namespace UltimateFertilizer {
                 tooltip: () => "Modify the speed bonus from Deluxe Fertilizer, by default 3",
                 getValue: () => _config.FertilizerQualityBoost[2],
                 setValue: value => _config.FertilizerQualityBoost[2] = value
+            );
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => "Basic Fertilizer Amount (RES)",
+                tooltip: () => "Modify the amount of Basic Fertilizer get per craft, by default 1",
+                getValue: () => _config.FertilizerQualityAmount[0],
+                setValue: value => _config.FertilizerQualityAmount[0] = value
+            );
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => "Quality Fertilizer Amount (RES)",
+                tooltip: () => "Modify the amount of Quality Fertilizer you get per craft, by default 2",
+                getValue: () => _config.FertilizerQualityAmount[1],
+                setValue: value => _config.FertilizerQualityAmount[1] = value
+            );
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => "Deluxe Fertilizer Amount (RES)",
+                tooltip: () => "Modify the amount of Deluxe Fertilizer you get per craft, by default 5",
+                getValue: () => _config.FertilizerQualityAmount[2],
+                setValue: value => _config.FertilizerQualityAmount[2] = value
             );
 
             configMenu.AddSectionTitle(mod: ModManifest, text: () => "Water Fertilizer");
@@ -152,11 +200,68 @@ namespace UltimateFertilizer {
                 getValue: () => _config.FertilizerWaterRetentionBoost[2],
                 setValue: value => _config.FertilizerWaterRetentionBoost[2] = value
             );
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => "Basic Retaining Soil Amount (RES)",
+                tooltip: () => "Modify the amount of Basic Retaining Soil get per craft, by default 1",
+                getValue: () => _config.FertilizerWaterRetentionAmount[0],
+                setValue: value => _config.FertilizerWaterRetentionAmount[0] = value
+            );
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => "Quality Retaining Soil Amount (RES)",
+                tooltip: () => "Modify the amount of Quality Retaining Soil you get per craft, by default 2",
+                getValue: () => _config.FertilizerWaterRetentionAmount[1],
+                setValue: value => _config.FertilizerWaterRetentionAmount[1] = value
+            );
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => "Deluxe Retaining Soil Amount (RES)",
+                tooltip: () => "Modify the amount of Deluxe Retaining Soil you get per craft, by default 1",
+                getValue: () => _config.FertilizerWaterRetentionAmount[2],
+                setValue: value => _config.FertilizerWaterRetentionAmount[2] = value
+            );
         }
 
         public static void Print(string msg) {
             _logger?.Log(msg, LogLevel.Info);
         }
+
+        [HarmonyPatch(typeof(CraftingRecipe), "InitShared")]
+        public static class InitShared {
+            public static void Postfix() {
+                foreach (var (key, value) in CraftingRecipe.craftingRecipes.ToArray()) {
+                    var amount = key switch {
+                        "Speed-Gro" => _config.FertilizerSpeedAmount[0],
+                        "Deluxe Speed-Gro" => _config.FertilizerSpeedAmount[1],
+                        "Hyper Speed-Gro" => _config.FertilizerSpeedAmount[2],
+                        "Basic Fertilizer" => _config.FertilizerQualityAmount[0],
+                        "Quality Fertilizer" => _config.FertilizerQualityAmount[1],
+                        "Deluxe Fertilizer" => _config.FertilizerQualityAmount[2],
+                        "Basic Retaining Soil" => _config.FertilizerQualityAmount[0],
+                        "Quality Retaining Soil" => _config.FertilizerWaterRetentionAmount[1],
+                        "Deluxe Retaining Soil" => _config.FertilizerWaterRetentionAmount[2],
+                        _ => -1
+                    };
+                    if (amount == -1) {
+                        continue;
+                    }
+
+                    var segment = value.Split("/");
+                    var output = segment[2].Split(" ");
+                    if (output.Length < 2) {
+                        output = output.AddToArray(amount.ToString());
+                    }
+                    else {
+                        output[1] = amount.ToString();
+                    }
+
+                    segment[2] = amount == 1 ? output[0] : output.Join(delimiter: " ");
+                    CraftingRecipe.craftingRecipes[key] = segment.Join(delimiter: "/");
+                }
+            }
+        }
+
 
         [HarmonyPatch(typeof(HoeDirt), "CheckApplyFertilizerRules")]
         public static class CheckApplyFertilizerRules {
