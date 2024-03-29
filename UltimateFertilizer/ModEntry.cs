@@ -10,6 +10,7 @@ using StardewValley.TerrainFeatures;
 namespace UltimateFertilizer {
     /// <summary>The mod entry point.</summary>
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Named For Harmony")]
+    [SuppressMessage("ReSharper", "RedundantAssignment", Justification = "Named For Harmony")]
     internal sealed class ModEntry : Mod {
         private Harmony? _harmony;
         private static IMonitor? _logger;
@@ -17,7 +18,7 @@ namespace UltimateFertilizer {
         private class Config {
             public bool EnableMultiFertilizer = true;
             public bool EnableAlwaysFertilizer = true;
-            public bool EnableMultiSameFertilizer = false;
+            public bool EnableMultiSameFertilizer;
 
             public readonly List<float> FertilizerSpeedBoost = new() {0.1f, 0.25f, 0.33f};
             public readonly List<int> FertilizerQualityBoost = new() {1, 2, 3};
@@ -152,8 +153,8 @@ namespace UltimateFertilizer {
 
         [HarmonyPatch(typeof(HoeDirt), "CheckApplyFertilizerRules")]
         public static class CheckApplyFertilizerRules {
-            public static bool ContainSameType(
-                List<string> fertilizers,
+            private static bool ContainSameType(
+                ICollection<string> fertilizers,
                 string newFertilizerId,
                 string currentFertilizerId
             ) {
@@ -161,7 +162,7 @@ namespace UltimateFertilizer {
                        fertilizers.Any(currentFertilizerId.Contains);
             }
 
-            public static bool ContainSameTypes(HoeDirt dirt, string fertilizerId) {
+            private static bool ContainSameTypes(HoeDirt dirt, string fertilizerId) {
                 return ContainSameType(FertilizerSpeed, fertilizerId, dirt.fertilizer.Value)
                        || ContainSameType(FertilizerWaterRetention, fertilizerId, dirt.fertilizer.Value)
                        || ContainSameType(FertilizerQuality, fertilizerId, dirt.fertilizer.Value);
@@ -182,16 +183,16 @@ namespace UltimateFertilizer {
                 if (!__instance.HasFertilizer()) return false;
                 fertilizerId = ItemRegistry.QualifyItemId(fertilizerId);
 
+                if (__instance.fertilizer.Value.Contains(fertilizerId)) {
+                    __result = HoeDirtFertilizerApplyStatus.HasThisFertilizer;
+                    return false;
+                }
+
+
                 if (!_config.EnableMultiFertilizer) {
                     __result = __instance.fertilizer.Value.Contains(fertilizerId)
                         ? HoeDirtFertilizerApplyStatus.HasAnotherFertilizer
                         : HoeDirtFertilizerApplyStatus.HasThisFertilizer;
-                    return false;
-                }
-
-                if (_config.EnableMultiSameFertilizer) {
-                    if (!__instance.fertilizer.Value.Contains(fertilizerId)) return false;
-                    __result = HoeDirtFertilizerApplyStatus.HasThisFertilizer;
                     return false;
                 }
                 
@@ -235,7 +236,9 @@ namespace UltimateFertilizer {
             }
         }
 
-        private static readonly List<string> FertilizerSpeed = new() {"(O)465", "(O)466", "(O)918"};
+        private static readonly List<string> FertilizerSpeed = new() {
+            HoeDirt.speedGroQID, HoeDirt.superSpeedGroQID, HoeDirt.hyperSpeedGroQID
+        };
 
         [HarmonyPatch(typeof(HoeDirt), "GetFertilizerSpeedBoost")]
         public static class GetFertilizerSpeedBoost {
@@ -255,7 +258,9 @@ namespace UltimateFertilizer {
             }
         }
 
-        private static readonly List<string> FertilizerQuality = new() {"(O)368", "(O)369", "(O)919"};
+        private static readonly List<string> FertilizerQuality = new() {
+            HoeDirt.fertilizerLowQualityQID, HoeDirt.fertilizerHighQualityQID, HoeDirt.fertilizerDeluxeQualityQID
+        };
 
         [HarmonyPatch(typeof(HoeDirt), "GetFertilizerQualityBoostLevel")]
         public static class GetFertilizerQualityBoostLevel {
@@ -275,7 +280,9 @@ namespace UltimateFertilizer {
             }
         }
 
-        private static readonly List<string> FertilizerWaterRetention = new() {"(O)370", "(O)371", "(O)920"};
+        private static readonly List<string> FertilizerWaterRetention = new() {
+            HoeDirt.waterRetentionSoilQID, HoeDirt.waterRetentionSoilQualityQID, HoeDirt.waterRetentionSoilDeluxeQID
+        };
 
         [HarmonyPatch(typeof(HoeDirt), "GetFertilizerWaterRetentionChance")]
         public static class GetFertilizerWaterRetentionChance {
@@ -346,7 +353,7 @@ namespace UltimateFertilizer {
                 var local = Game1.GlobalToLocal(Game1.viewport, __instance.Tile * 64f);
                 var layer = 1.9E-08f;
                 foreach (var id in __instance.fertilizer.Value.Split("|")) {
-                    fert_batch.Draw(Game1.mouseCursors, local, new Rectangle?(GetFertilizerSourceRect(id)), Color.White,
+                    fert_batch.Draw(Game1.mouseCursors, local, GetFertilizerSourceRect(id), Color.White,
                         0.0f, Vector2.Zero, 4f, SpriteEffects.None, layer);
                     layer += 1E-09f;
                 }
