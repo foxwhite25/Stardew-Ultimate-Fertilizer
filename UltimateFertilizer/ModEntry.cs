@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection.Emit;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -6,6 +7,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.TerrainFeatures;
+using Object = StardewValley.Object;
 
 namespace UltimateFertilizer {
     /// <summary>The mod entry point.</summary>
@@ -314,6 +316,49 @@ namespace UltimateFertilizer {
                 }
 
                 return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(Object), "placementAction")]
+        public static class ObjectTranspiler {
+            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+                var codes = new List<CodeInstruction>(instructions);
+                var start = -1;
+                var end = -1;
+                var found = false;
+                for (var i = 0; i < codes.Count; i++) {
+                    if (codes[i].opcode != OpCodes.Ret) continue;
+                    if (found)
+                    {
+                        Print("END " + i);
+
+                        end = i; // include current 'ret'
+                        break;
+                    }
+                    
+                    Print("START " + (i + 1));
+                    start = i + 1; // exclude current 'ret'
+
+                    for (var j = start; j < codes.Count; j++)
+                    {
+                        if (codes[j].opcode == OpCodes.Ret)
+                            break;
+                        var strOperand = codes[j].operand as string;
+                        if (strOperand != "Strings\\StringsFromCSFiles:HoeDirt.cs.13916") continue;
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (start <= -1 || end <= -1) return codes.AsEnumerable();
+                // we cannot remove the first code of our range since some jump actually jumps to
+                // it, so we replace it with a no-op instead of fixing that jump (easier).
+                for (var i = start; i <= end; i++) {
+                    codes[i].opcode = OpCodes.Nop;
+                    codes[i].operand = null;
+                }
+                
+                return codes.AsEnumerable();
             }
         }
 
