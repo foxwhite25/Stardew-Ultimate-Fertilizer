@@ -25,6 +25,7 @@ namespace UltimateFertilizer {
             // ReSharper disable FieldCanBeMadeReadOnly.Local
             public List<float> FertilizerSpeedBoost = new() {0.1f, 0.25f, 0.33f};
             public List<int> FertilizerSpeedAmount = new() {5, 5, 1};
+            public bool SpeedRemainAfterHarvest = false;
 
             public List<int> FertilizerQualityBoost = new() {1, 2, 3};
             public List<int> FertilizerQualityAmount = new() {1, 2, 5};
@@ -34,13 +35,15 @@ namespace UltimateFertilizer {
         }
 
         private static Config _config = null!;
+        private static bool DebugMode;
 
         public override void Entry(IModHelper helper) {
-            _harmony = new Harmony(ModManifest.UniqueID);
-            _logger = Monitor;
-            _harmony.PatchAll();
             _config = Helper.ReadConfig<Config>();
+            _logger = Monitor;
+            _harmony = new Harmony(ModManifest.UniqueID);
+            _harmony.PatchAll();
             helper.Events.GameLoop.GameLaunched += OnGameLaunched!;
+            helper.Events.GameLoop.SaveLoaded += (object sender, SaveLoadedEventArgs e) => { InitShared.Postfix(); };
 
             Monitor.Log("Plugin is now working.", LogLevel.Info);
         }
@@ -55,7 +58,10 @@ namespace UltimateFertilizer {
             configMenu.Register(
                 mod: ModManifest,
                 reset: () => _config = new Config(),
-                save: () => Helper.WriteConfig(_config)
+                save: () => {
+                    Helper.WriteConfig(_config);
+                    InitShared.Postfix();
+                }
             );
 
             configMenu.AddSectionTitle(mod: ModManifest, text: () => "Toggles");
@@ -90,8 +96,16 @@ namespace UltimateFertilizer {
                 setValue: value => _config.EnableAlwaysFertilizer = value
             );
 
-            configMenu.AddSectionTitle(mod: ModManifest, text: () => "(RES) means restart required");
+
             configMenu.AddSectionTitle(mod: ModManifest, text: () => "Speed Fertilizer");
+            configMenu.AddBoolOption(
+                mod: ModManifest,
+                name: () => "Affect Multi-Harvest",
+                tooltip: () =>
+                    "Whether speed fertilizers remain active after the first harvest for multi harvest crops (eg ancient fruit).",
+                getValue: () => _config.SpeedRemainAfterHarvest,
+                setValue: value => _config.SpeedRemainAfterHarvest = value
+            );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Speed-Gro Bonus",
@@ -115,21 +129,21 @@ namespace UltimateFertilizer {
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Speed-Gro Amount (RES)",
+                name: () => "Speed-Gro Amount",
                 tooltip: () => "Modify the amount of Speed-Gro you get per craft, by default 5",
                 getValue: () => _config.FertilizerSpeedAmount[0],
                 setValue: value => _config.FertilizerSpeedAmount[0] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Deluxe Speed-Gro Amount (RES)",
+                name: () => "Deluxe Speed-Gro Amount",
                 tooltip: () => "Modify the amount of Deluxe Speed-Gro you get per craft, by default 5",
                 getValue: () => _config.FertilizerSpeedAmount[1],
                 setValue: value => _config.FertilizerSpeedAmount[1] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Hyper Speed-Gro Amount (RES)",
+                name: () => "Hyper Speed-Gro Amount",
                 tooltip: () => "Modify the amount of Hyper Speed-Gro you get per craft, by default 1",
                 getValue: () => _config.FertilizerSpeedAmount[2],
                 setValue: value => _config.FertilizerSpeedAmount[2] = value
@@ -159,21 +173,21 @@ namespace UltimateFertilizer {
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Basic Fertilizer Amount (RES)",
+                name: () => "Basic Fertilizer Amount",
                 tooltip: () => "Modify the amount of Basic Fertilizer get per craft, by default 1",
                 getValue: () => _config.FertilizerQualityAmount[0],
                 setValue: value => _config.FertilizerQualityAmount[0] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Quality Fertilizer Amount (RES)",
+                name: () => "Quality Fertilizer Amount",
                 tooltip: () => "Modify the amount of Quality Fertilizer you get per craft, by default 2",
                 getValue: () => _config.FertilizerQualityAmount[1],
                 setValue: value => _config.FertilizerQualityAmount[1] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Deluxe Fertilizer Amount (RES)",
+                name: () => "Deluxe Fertilizer Amount",
                 tooltip: () => "Modify the amount of Deluxe Fertilizer you get per craft, by default 5",
                 getValue: () => _config.FertilizerQualityAmount[2],
                 setValue: value => _config.FertilizerQualityAmount[2] = value
@@ -204,21 +218,21 @@ namespace UltimateFertilizer {
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Basic Retaining Soil Amount (RES)",
+                name: () => "Basic Retaining Soil Amount",
                 tooltip: () => "Modify the amount of Basic Retaining Soil get per craft, by default 1",
                 getValue: () => _config.FertilizerWaterRetentionAmount[0],
                 setValue: value => _config.FertilizerWaterRetentionAmount[0] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Quality Retaining Soil Amount (RES)",
+                name: () => "Quality Retaining Soil Amount",
                 tooltip: () => "Modify the amount of Quality Retaining Soil you get per craft, by default 2",
                 getValue: () => _config.FertilizerWaterRetentionAmount[1],
                 setValue: value => _config.FertilizerWaterRetentionAmount[1] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Deluxe Retaining Soil Amount (RES)",
+                name: () => "Deluxe Retaining Soil Amount",
                 tooltip: () => "Modify the amount of Deluxe Retaining Soil you get per craft, by default 1",
                 getValue: () => _config.FertilizerWaterRetentionAmount[2],
                 setValue: value => _config.FertilizerWaterRetentionAmount[2] = value
@@ -226,13 +240,35 @@ namespace UltimateFertilizer {
         }
 
         public static void Print(string msg) {
-            _logger?.Log(msg, LogLevel.Info);
+            if (DebugMode) {
+                _logger?.Log(msg, LogLevel.Info);
+            }
         }
+
+        [HarmonyPatch(typeof(Crop), "harvest")]
+        public static class Harvest {
+            public static void Postfix(Crop __instance, HoeDirt soil) {
+                if (!_config.SpeedRemainAfterHarvest) {
+                    return;
+                }
+                var data = __instance.GetData();
+                var regrow_day = data?.RegrowDays ?? -1;
+                if (regrow_day <= 0)
+                    return;
+                if (__instance.dayOfCurrentPhase.Value != regrow_day) {
+                    return;
+                }
+                var speed = soil.GetFertilizerSpeedBoost();
+                __instance.dayOfCurrentPhase.Value = (int) Math.Ceiling(regrow_day * (1.0 - speed));
+            }
+        }
+
 
         [HarmonyPatch(typeof(CraftingRecipe), "InitShared")]
         public static class InitShared {
             public static void Postfix() {
                 foreach (var (key, value) in CraftingRecipe.craftingRecipes.ToArray()) {
+                    Print("Found recipe for " + key);
                     var amount = key switch {
                         "Speed-Gro" => _config.FertilizerSpeedAmount[0],
                         "Deluxe Speed-Gro" => _config.FertilizerSpeedAmount[1],
@@ -249,6 +285,7 @@ namespace UltimateFertilizer {
                         continue;
                     }
 
+                    Print(key + " Original: " + value);
                     var segment = value.Split("/");
                     var output = segment[2].Split(" ");
                     if (output.Length < 2) {
@@ -260,6 +297,7 @@ namespace UltimateFertilizer {
 
                     segment[2] = amount == 1 ? output[0] : output.Join(delimiter: " ");
                     CraftingRecipe.craftingRecipes[key] = segment.Join(delimiter: "/");
+                    Print(key + " Fixed: " + CraftingRecipe.craftingRecipes[key]);
                 }
             }
         }
@@ -328,19 +366,17 @@ namespace UltimateFertilizer {
                 var found = false;
                 for (var i = 0; i < codes.Count; i++) {
                     if (codes[i].opcode != OpCodes.Ret) continue;
-                    if (found)
-                    {
-                        Print("END " + i);
+                    if (found) {
+                        Print("Transpiler found end " + i);
 
                         end = i; // include current 'ret'
                         break;
                     }
-                    
-                    Print("START " + (i + 1));
+
+                    Print("Transpiler potential start  " + (i + 1));
                     start = i + 1; // exclude current 'ret'
 
-                    for (var j = start; j < codes.Count; j++)
-                    {
+                    for (var j = start; j < codes.Count; j++) {
                         if (codes[j].opcode == OpCodes.Ret)
                             break;
                         var strOperand = codes[j].operand as string;
@@ -357,7 +393,7 @@ namespace UltimateFertilizer {
                     codes[i].opcode = OpCodes.Nop;
                     codes[i].operand = null;
                 }
-                
+
                 return codes.AsEnumerable();
             }
         }
@@ -404,6 +440,15 @@ namespace UltimateFertilizer {
                     __instance.fertilizer.Value = itemId;
                 }
 
+                Print("Fertilizer value: " + __instance.fertilizer.Value);
+                if (_config.SpeedRemainAfterHarvest &&  __instance.crop.dayOfCurrentPhase.Value != 0) {
+                    var data = __instance.crop.GetData();
+                    var regrow_day = data?.RegrowDays ?? -1;
+                    if (regrow_day > 0) {
+                        var speed = __instance.GetFertilizerSpeedBoost();
+                        __instance.crop.dayOfCurrentPhase.Value = (int) Math.Ceiling(regrow_day * (1.0 - speed));
+                    }
+                }
                 __instance.applySpeedIncreases(who);
                 __instance.Location.playSound("dirtyHit");
                 __result = true;
