@@ -35,7 +35,7 @@ namespace UltimateFertilizer {
         }
 
         private static Config _config = null!;
-        private const bool DebugMode = true;
+        private const bool DebugMode = false;
 
         public override void Entry(IModHelper helper) {
             _config = Helper.ReadConfig<Config>();
