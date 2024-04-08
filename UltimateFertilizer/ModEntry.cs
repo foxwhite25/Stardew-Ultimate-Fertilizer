@@ -69,8 +69,8 @@ namespace UltimateFertilizer {
                 mod: ModManifest,
                 name: () => "Enable Multi Fertilizer",
                 tooltip: () =>
-                    "Allow you to apply multiple types of fertilizer to a crop space.\n" +
-                    "Config only apply when you use fertilizer, this means if your map already have mixed fertilizer, they still works.",
+                    "Allows you to apply multiple types of fertilizer to a crop space.\n" +
+                    "This config only applies when you use fertilizer, so if you've already mixed fertilizer on a tile then disable this option, those tiles still work.",
                 getValue: () => _config.EnableMultiFertilizer,
                 setValue: value => _config.EnableMultiFertilizer = value
             );
@@ -79,11 +79,11 @@ namespace UltimateFertilizer {
                 name: () => "Multi Same Type Fertilizer Mode",
                 getValue: () => _config.SameFertilizerMode,
                 tooltip: () =>
-                    "Allow you to choice what happen when you apply multiple same type of fertilizer to a crop space.\n" +
-                    "Replace: the fertilizer you use would replace the current one without refund, effectively a upgrade or downgrade.\n" +
-                    "Stack: same type of fertilizer stack their bonus, applying a 10% and a 25% gives you a 35% bonus.\n" +
-                    "Disable: You can not apply fertilizer if it's the same type.\n" +
-                    "Config only apply when you use fertilizer, this means if your map already have mixed fertilizer, they still works.\n" +
+                    "Allow you to choose what happen when you apply multiple of the same type of fertilizer to a crop space.\n" +
+                    "Replace: The fertilizer you use replaces the current one without refund; effectively an upgrade or downgrade.\n" +
+                    "Stack: Same type of fertilizer stack their bonus; for example, applying a 10% and a 25% gives you a 35% bonus.\n" +
+                    "Disable: You cannot apply fertilizer if it's the same type.\n" +
+                    "This config only applies when you use fertilizer, so if you've already mixed fertilizer on a tile then disable this option, those tiles still work.\n" +
                     "Requires Enable Multi Fertilizer to do anything.",
                 setValue: value => _config.SameFertilizerMode = value,
                 allowedValues: new[] {"Replace", "Stack", "Disable"}
@@ -91,7 +91,7 @@ namespace UltimateFertilizer {
             configMenu.AddBoolOption(
                 mod: ModManifest,
                 name: () => "Enable Fertilizer Anytime",
-                tooltip: () => "Allow you to apply fertilizer to a crop space that have grown crops.",
+                tooltip: () => "Allows you to apply fertilizer to a crop space that already has crops on it.",
                 getValue: () => _config.EnableAlwaysFertilizer,
                 setValue: value => _config.EnableAlwaysFertilizer = value
             );
@@ -102,49 +102,49 @@ namespace UltimateFertilizer {
                 mod: ModManifest,
                 name: () => "Affect Multi-Harvest",
                 tooltip: () =>
-                    "Whether speed fertilizers remain active after the first harvest for multi harvest crops (eg ancient fruit).",
+                    "Whether speed fertilizers remain active after the first harvest for multi harvest crops (e.g. ancient fruit).",
                 getValue: () => _config.SpeedRemainAfterHarvest,
                 setValue: value => _config.SpeedRemainAfterHarvest = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Speed-Gro Bonus",
-                tooltip: () => "Modify the speed bonus from Speed-Gro, by default 10% (0.1)",
+                tooltip: () => "Modify the speed bonus from Speed-Gro; default 10% (0.1)",
                 getValue: () => _config.FertilizerSpeedBoost[0],
                 setValue: value => _config.FertilizerSpeedBoost[0] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Deluxe Speed-Gro Bonus",
-                tooltip: () => "Modify the speed bonus from Deluxe Speed-Gro, by default 25% (0.25)",
+                tooltip: () => "Modify the speed bonus from Deluxe Speed-Gro; default 25% (0.25)",
                 getValue: () => _config.FertilizerSpeedBoost[1],
                 setValue: value => _config.FertilizerSpeedBoost[1] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Hyper Speed-Gro Bonus",
-                tooltip: () => "Modify the speed bonus from Hyper Speed-Gro, by default 33% (0.33)",
+                tooltip: () => "Modify the speed bonus from Hyper Speed-Gro; default 33% (0.33)",
                 getValue: () => _config.FertilizerSpeedBoost[2],
                 setValue: value => _config.FertilizerSpeedBoost[2] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Speed-Gro Amount",
-                tooltip: () => "Modify the amount of Speed-Gro you get per craft, by default 5",
+                tooltip: () => "Modify the amount of Speed-Gro you get per craft; default 5",
                 getValue: () => _config.FertilizerSpeedAmount[0],
                 setValue: value => _config.FertilizerSpeedAmount[0] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Deluxe Speed-Gro Amount",
-                tooltip: () => "Modify the amount of Deluxe Speed-Gro you get per craft, by default 5",
+                tooltip: () => "Modify the amount of Deluxe Speed-Gro you get per craft; default 5",
                 getValue: () => _config.FertilizerSpeedAmount[1],
                 setValue: value => _config.FertilizerSpeedAmount[1] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Hyper Speed-Gro Amount",
-                tooltip: () => "Modify the amount of Hyper Speed-Gro you get per craft, by default 1",
+                tooltip: () => "Modify the amount of Hyper Speed-Gro you get per craft; default 1",
                 getValue: () => _config.FertilizerSpeedAmount[2],
                 setValue: value => _config.FertilizerSpeedAmount[2] = value
             );
@@ -153,42 +153,42 @@ namespace UltimateFertilizer {
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Basic Fertilizer Bonus",
-                tooltip: () => "Modify the quality bonus from Basic Fertilizer, by default 1",
+                tooltip: () => "Modify the quality bonus from Basic Fertilizer; default 1",
                 getValue: () => _config.FertilizerQualityBoost[0],
                 setValue: value => _config.FertilizerQualityBoost[0] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Quality Fertilizer Bonus",
-                tooltip: () => "Modify the speed bonus from Quality Fertilizer, by default 2",
+                tooltip: () => "Modify the quality bonus from Quality Fertilizer; default 2",
                 getValue: () => _config.FertilizerQualityBoost[1],
                 setValue: value => _config.FertilizerQualityBoost[1] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Deluxe Fertilizer Bonus",
-                tooltip: () => "Modify the speed bonus from Deluxe Fertilizer, by default 3",
+                tooltip: () => "Modify the quality bonus from Deluxe Fertilizer; default 3",
                 getValue: () => _config.FertilizerQualityBoost[2],
                 setValue: value => _config.FertilizerQualityBoost[2] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Basic Fertilizer Amount",
-                tooltip: () => "Modify the amount of Basic Fertilizer get per craft, by default 1",
+                tooltip: () => "Modify the amount of Basic Fertilizer get per craft; default 1",
                 getValue: () => _config.FertilizerQualityAmount[0],
                 setValue: value => _config.FertilizerQualityAmount[0] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Quality Fertilizer Amount",
-                tooltip: () => "Modify the amount of Quality Fertilizer you get per craft, by default 2",
+                tooltip: () => "Modify the amount of Quality Fertilizer you get per craft; default 2",
                 getValue: () => _config.FertilizerQualityAmount[1],
                 setValue: value => _config.FertilizerQualityAmount[1] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Deluxe Fertilizer Amount",
-                tooltip: () => "Modify the amount of Deluxe Fertilizer you get per craft, by default 5",
+                tooltip: () => "Modify the amount of Deluxe Fertilizer you get per craft; default 5",
                 getValue: () => _config.FertilizerQualityAmount[2],
                 setValue: value => _config.FertilizerQualityAmount[2] = value
             );
@@ -197,7 +197,7 @@ namespace UltimateFertilizer {
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Basic Retaining Soil Bonus",
-                tooltip: () => "Modify the chance of retaining water from Basic Retaining Soil, by default 33% (0.33)",
+                tooltip: () => "Modify the chance of retaining water when using Basic Retaining Soil; default 33% (0.33)",
                 getValue: () => _config.FertilizerWaterRetentionBoost[0],
                 setValue: value => _config.FertilizerWaterRetentionBoost[0] = value
             );
@@ -205,35 +205,35 @@ namespace UltimateFertilizer {
                 mod: ModManifest,
                 name: () => "Quality Retaining Soil Bonus",
                 tooltip: () =>
-                    "Modify the chance of retaining water from Quality Retaining Soil, by default 66% (0.66)",
+                    "Modify the chance of retaining water when using Quality Retaining Soil; default 66% (0.66)",
                 getValue: () => _config.FertilizerWaterRetentionBoost[1],
                 setValue: value => _config.FertilizerWaterRetentionBoost[1] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Deluxe Retaining Soil Bonus",
-                tooltip: () => "Modify the chance of retaining water from Deluxe Retaining Soil, by default 100% (1.0)",
+                tooltip: () => "Modify the chance of retaining water when using Deluxe Retaining Soil; default 100% (1.0)",
                 getValue: () => _config.FertilizerWaterRetentionBoost[2],
                 setValue: value => _config.FertilizerWaterRetentionBoost[2] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Basic Retaining Soil Amount",
-                tooltip: () => "Modify the amount of Basic Retaining Soil get per craft, by default 1",
+                tooltip: () => "Modify the amount of Basic Retaining Soil you get per craft; default 1",
                 getValue: () => _config.FertilizerWaterRetentionAmount[0],
                 setValue: value => _config.FertilizerWaterRetentionAmount[0] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Quality Retaining Soil Amount",
-                tooltip: () => "Modify the amount of Quality Retaining Soil you get per craft, by default 2",
+                tooltip: () => "Modify the amount of Quality Retaining Soil you get per craft; default 2",
                 getValue: () => _config.FertilizerWaterRetentionAmount[1],
                 setValue: value => _config.FertilizerWaterRetentionAmount[1] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Deluxe Retaining Soil Amount",
-                tooltip: () => "Modify the amount of Deluxe Retaining Soil you get per craft, by default 1",
+                tooltip: () => "Modify the amount of Deluxe Retaining Soil you get per craft; default 1",
                 getValue: () => _config.FertilizerWaterRetentionAmount[2],
                 setValue: value => _config.FertilizerWaterRetentionAmount[2] = value
             );
