@@ -35,7 +35,7 @@ namespace UltimateFertilizer {
         }
 
         private static Config _config = null!;
-        private static bool DebugMode;
+        private const bool DebugMode = true;
 
         public override void Entry(IModHelper helper) {
             _config = Helper.ReadConfig<Config>();
@@ -416,17 +416,22 @@ namespace UltimateFertilizer {
                 }
 
                 itemId = ItemRegistry.QualifyItemId(itemId) ?? itemId;
+                __result = true;
 
                 if (__instance.fertilizer.Value is {Length: > 0}) {
                     void DoApply() {
                         if (_config.SameFertilizerMode == "Replace") {
                             var fertilizerList = Fertilizers.Find(list => list.Contains(itemId));
                             if (fertilizerList != null) {
-                                foreach (var s in fertilizerList) {
+                                var found = false;
+                                foreach (var s in fertilizerList.Where(s => __instance.fertilizer.Value.Contains(s))) {
                                     __instance.fertilizer.Value = __instance.fertilizer.Value.Replace(s, itemId);
+                                    found = true;
                                 }
 
-                                return;
+                                if (found) {
+                                    return;
+                                }
                             }
                         }
 
@@ -441,7 +446,7 @@ namespace UltimateFertilizer {
                 }
 
                 Print("Fertilizer value: " + __instance.fertilizer.Value);
-                if (_config.SpeedRemainAfterHarvest &&  __instance.crop.dayOfCurrentPhase.Value != 0) {
+                if (_config.SpeedRemainAfterHarvest && __instance.crop != null &&  __instance.crop.dayOfCurrentPhase.Value != 0) {
                     var data = __instance.crop.GetData();
                     var regrow_day = data?.RegrowDays ?? -1;
                     if (regrow_day > 0) {
@@ -451,7 +456,6 @@ namespace UltimateFertilizer {
                 }
                 __instance.applySpeedIncreases(who);
                 __instance.Location.playSound("dirtyHit");
-                __result = true;
                 return false;
             }
         }
