@@ -37,10 +37,12 @@ namespace UltimateFertilizer {
 
         private static Config _config = null!;
         private const bool DebugMode = false;
+        private static IModHelper _helper = null!;
 
         public override void Entry(IModHelper helper) {
             _config = Helper.ReadConfig<Config>();
             _logger = Monitor;
+            _helper = helper;
             _harmony = new Harmony(ModManifest.UniqueID);
             _harmony.PatchAll();
             helper.Events.GameLoop.GameLaunched += OnGameLaunched!;
@@ -65,180 +67,179 @@ namespace UltimateFertilizer {
                 }
             );
 
-            configMenu.AddSectionTitle(mod: ModManifest, text: () => "Toggles");
+            configMenu.AddSectionTitle(mod: ModManifest, text: () => _helper.Translation.Get("config.section.toggles"));
             configMenu.AddTextOption(
                 mod: ModManifest,
-                name: () => "Fertilizer Mode",
+                name: () => _helper.Translation.Get("config.fertilizer_mode.title"),
                 tooltip: () =>
-                    "Choose your fertilizer application mode: \n" +
-                    "multi-fertilizer-stack: Allows you to mix different types of fertilizers with varied levels on a single crop space.\n" +
-                    "multi-fertilizer-single-level: Allows you to mix different types of fertilizers but only at a single level on a crop space.\n" +
-                    "single-fertilizer-replace: Allows you to replace a single type of fertilizer at any time on a crop space.\n" +
-                    "single-fertilizer-stack: Allows you to stack a single type of fertilizer with different levels on a crop space.\n" +
-                    "Vanilla: Default Stardew Valley fertilizer behavior.\n" +
-                    "Note: This config only applies when you use fertilizer.\n" +
-                    "      If you've already mixed fertilizer on a tile and then disable this option, \n" +
-                    "      those tiles will still work as per the previous setting.",
+                    $"{_helper.Translation.Get("config.fertilizer_mode.tooltip.choose")}" +
+                    $"{_helper.Translation.Get("config.fertilizer_mode.tooltip.multi-fertilizer-stack")}" +
+                    $"{_helper.Translation.Get("config.fertilizer_mode.tooltip.multi-fertilizer-single-level")}" +
+                    $"{_helper.Translation.Get("config.fertilizer_mode.tooltip.single-fertilizer-replace")}" +
+                    $"{_helper.Translation.Get("config.fertilizer_mode.tooltip.single-fertilizer-stack")}" +
+                    $"{_helper.Translation.Get("config.fertilizer_mode.tooltip.vanilla")}" +
+                    $"{_helper.Translation.Get("config.fertilizer_mode.tooltip.note")}",
                 getValue: () => _config.FertilizerMode,
                 setValue: value => _config.FertilizerMode = value,
-                allowedValues: new[] {"multi-fertilizer-stack", "multi-fertilizer-single-level", "single-fertilizer-replace", "single-fertilizer-stack", "Vanilla"}
+                allowedValues: new[] {
+                    "multi-fertilizer-stack", "multi-fertilizer-single-level", "single-fertilizer-replace",
+                    "single-fertilizer-stack", "Vanilla"
+                }
             );
 
             configMenu.AddBoolOption(
                 mod: ModManifest,
-                name: () => "Enable Fertilizer Anytime",
-                tooltip: () => "Allows you to apply fertilizer to a crop space that already has crops on it.",
+                name: () => _helper.Translation.Get("config.enable_fertilizer_anytime.title"),
+                tooltip: () => _helper.Translation.Get("config.enable_fertilizer_anytime.tooltip"),
                 getValue: () => _config.EnableAlwaysFertilizer,
                 setValue: value => _config.EnableAlwaysFertilizer = value
             );
             configMenu.AddBoolOption(
                 mod: ModManifest,
-                name: () => "Keep Fertilizer Across Season",
-                tooltip: () => "Allow fertilizers to not disappear between seasons.",
+                name: () => _helper.Translation.Get("config.keep_fertilizer_across_season.title"),
+                tooltip: () => _helper.Translation.Get("config.keep_fertilizer_across_season.tooltip"),
                 getValue: () => _config.EnableKeepFertilizerAcrossSeason,
                 setValue: value => _config.EnableKeepFertilizerAcrossSeason = value
             );
 
-
-            configMenu.AddSectionTitle(mod: ModManifest, text: () => "Speed Fertilizer");
+            configMenu.AddSectionTitle(mod: ModManifest,
+                text: () => _helper.Translation.Get("config.section.speed_fertilizer"));
             configMenu.AddBoolOption(
                 mod: ModManifest,
-                name: () => "Affect Multi-Harvest",
-                tooltip: () =>
-                    "Whether speed fertilizers remain active after the first harvest for multi harvest crops (e.g. ancient fruit).",
+                name: () => _helper.Translation.Get("config.affect_multi_harvest.title"),
+                tooltip: () => _helper.Translation.Get("config.affect_multi_harvest.tooltip"),
                 getValue: () => _config.SpeedRemainAfterHarvest,
                 setValue: value => _config.SpeedRemainAfterHarvest = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Speed-Gro Bonus",
-                tooltip: () => "Modify the speed bonus from Speed-Gro; default 10% (0.1)",
+                name: () => _helper.Translation.Get("config.speed_gro_bonus.title"),
+                tooltip: () => _helper.Translation.Get("config.speed_gro_bonus.tooltip"),
                 getValue: () => _config.FertilizerSpeedBoost[0],
                 setValue: value => _config.FertilizerSpeedBoost[0] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Deluxe Speed-Gro Bonus",
-                tooltip: () => "Modify the speed bonus from Deluxe Speed-Gro; default 25% (0.25)",
+                name: () => _helper.Translation.Get("config.deluxe_speed_gro_bonus.title"),
+                tooltip: () => _helper.Translation.Get("config.deluxe_speed_gro_bonus.tooltip"),
                 getValue: () => _config.FertilizerSpeedBoost[1],
                 setValue: value => _config.FertilizerSpeedBoost[1] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Hyper Speed-Gro Bonus",
-                tooltip: () => "Modify the speed bonus from Hyper Speed-Gro; default 33% (0.33)",
+                name: () => _helper.Translation.Get("config.hyper_speed_gro_bonus.title"),
+                tooltip: () => _helper.Translation.Get("config.hyper_speed_gro_bonus.tooltip"),
                 getValue: () => _config.FertilizerSpeedBoost[2],
                 setValue: value => _config.FertilizerSpeedBoost[2] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Speed-Gro Amount",
-                tooltip: () => "Modify the amount of Speed-Gro you get per craft; default 5",
+                name: () => _helper.Translation.Get("config.speed_gro_amount.title"),
+                tooltip: () => _helper.Translation.Get("config.speed_gro_amount.tooltip"),
                 getValue: () => _config.FertilizerSpeedAmount[0],
                 setValue: value => _config.FertilizerSpeedAmount[0] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Deluxe Speed-Gro Amount",
-                tooltip: () => "Modify the amount of Deluxe Speed-Gro you get per craft; default 5",
+                name: () => _helper.Translation.Get("config.deluxe_speed_gro_amount.title"),
+                tooltip: () => _helper.Translation.Get("config.deluxe_speed_gro_amount.tooltip"),
                 getValue: () => _config.FertilizerSpeedAmount[1],
                 setValue: value => _config.FertilizerSpeedAmount[1] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Hyper Speed-Gro Amount",
-                tooltip: () => "Modify the amount of Hyper Speed-Gro you get per craft; default 1",
+                name: () => _helper.Translation.Get("config.hyper_speed_gro_amount.title"),
+                tooltip: () => _helper.Translation.Get("config.hyper_speed_gro_amount.tooltip"),
                 getValue: () => _config.FertilizerSpeedAmount[2],
                 setValue: value => _config.FertilizerSpeedAmount[2] = value
             );
 
-            configMenu.AddSectionTitle(mod: ModManifest, text: () => "Quality Fertilizer");
+            configMenu.AddSectionTitle(mod: ModManifest,
+                text: () => _helper.Translation.Get("config.section.quality_fertilizer"));
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Basic Fertilizer Bonus",
-                tooltip: () => "Modify the quality bonus from Basic Fertilizer; default 1",
+                name: () => _helper.Translation.Get("config.basic_fertilizer_bonus.title"),
+                tooltip: () => _helper.Translation.Get("config.basic_fertilizer_bonus.tooltip"),
                 getValue: () => _config.FertilizerQualityBoost[0],
                 setValue: value => _config.FertilizerQualityBoost[0] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Quality Fertilizer Bonus",
-                tooltip: () => "Modify the quality bonus from Quality Fertilizer; default 2",
+                name: () => _helper.Translation.Get("config.quality_fertilizer_bonus.title"),
+                tooltip: () => _helper.Translation.Get("config.quality_fertilizer_bonus.tooltip"),
                 getValue: () => _config.FertilizerQualityBoost[1],
                 setValue: value => _config.FertilizerQualityBoost[1] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Deluxe Fertilizer Bonus",
-                tooltip: () => "Modify the quality bonus from Deluxe Fertilizer; default 3",
+                name: () => _helper.Translation.Get("config.deluxe_fertilizer_bonus.title"),
+                tooltip: () => _helper.Translation.Get("config.deluxe_fertilizer_bonus.tooltip"),
                 getValue: () => _config.FertilizerQualityBoost[2],
                 setValue: value => _config.FertilizerQualityBoost[2] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Basic Fertilizer Amount",
-                tooltip: () => "Modify the amount of Basic Fertilizer get per craft; default 1",
+                name: () => _helper.Translation.Get("config.basic_fertilizer_amount.title"),
+                tooltip: () => _helper.Translation.Get("config.basic_fertilizer_amount.tooltip"),
                 getValue: () => _config.FertilizerQualityAmount[0],
                 setValue: value => _config.FertilizerQualityAmount[0] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Quality Fertilizer Amount",
-                tooltip: () => "Modify the amount of Quality Fertilizer you get per craft; default 2",
+                name: () => _helper.Translation.Get("config.quality_fertilizer_amount.title"),
+                tooltip: () => _helper.Translation.Get("config.quality_fertilizer_amount.tooltip"),
                 getValue: () => _config.FertilizerQualityAmount[1],
                 setValue: value => _config.FertilizerQualityAmount[1] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Deluxe Fertilizer Amount",
-                tooltip: () => "Modify the amount of Deluxe Fertilizer you get per craft; default 5",
+                name: () => _helper.Translation.Get("config.deluxe_fertilizer_amount.title"),
+                tooltip: () => _helper.Translation.Get("config.deluxe_fertilizer_amount.tooltip"),
                 getValue: () => _config.FertilizerQualityAmount[2],
                 setValue: value => _config.FertilizerQualityAmount[2] = value
             );
 
-            configMenu.AddSectionTitle(mod: ModManifest, text: () => "Water Fertilizer");
+            configMenu.AddSectionTitle(mod: ModManifest,
+                text: () => _helper.Translation.Get("config.section.water_fertilizer"));
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Basic Retaining Soil Bonus",
-                tooltip: () =>
-                    "Modify the chance of retaining water when using Basic Retaining Soil; default 33% (0.33)",
+                name: () => _helper.Translation.Get("config.basic_retaining_soil_bonus.title"),
+                tooltip: () => _helper.Translation.Get("config.basic_retaining_soil_bonus.tooltip"),
                 getValue: () => _config.FertilizerWaterRetentionBoost[0],
                 setValue: value => _config.FertilizerWaterRetentionBoost[0] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Quality Retaining Soil Bonus",
-                tooltip: () =>
-                    "Modify the chance of retaining water when using Quality Retaining Soil; default 66% (0.66)",
+                name: () => _helper.Translation.Get("config.quality_retaining_soil_bonus.title"),
+                tooltip: () => _helper.Translation.Get("config.quality_retaining_soil_bonus.tooltip"),
                 getValue: () => _config.FertilizerWaterRetentionBoost[1],
                 setValue: value => _config.FertilizerWaterRetentionBoost[1] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Deluxe Retaining Soil Bonus",
-                tooltip: () =>
-                    "Modify the chance of retaining water when using Deluxe Retaining Soil; default 100% (1.0)",
+                name: () => _helper.Translation.Get("config.deluxe_retaining_soil_bonus.title"),
+                tooltip: () => _helper.Translation.Get("config.deluxe_retaining_soil_bonus.tooltip"),
                 getValue: () => _config.FertilizerWaterRetentionBoost[2],
                 setValue: value => _config.FertilizerWaterRetentionBoost[2] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Basic Retaining Soil Amount",
-                tooltip: () => "Modify the amount of Basic Retaining Soil you get per craft; default 1",
+                name: () => _helper.Translation.Get("config.basic_retaining_soil_amount.title"),
+                tooltip: () => _helper.Translation.Get("config.basic_retaining_soil_amount.tooltip"),
                 getValue: () => _config.FertilizerWaterRetentionAmount[0],
                 setValue: value => _config.FertilizerWaterRetentionAmount[0] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Quality Retaining Soil Amount",
-                tooltip: () => "Modify the amount of Quality Retaining Soil you get per craft; default 2",
+                name: () => _helper.Translation.Get("config.quality_retaining_soil_amount.title"),
+                tooltip: () => _helper.Translation.Get("config.quality_retaining_soil_amount.tooltip"),
                 getValue: () => _config.FertilizerWaterRetentionAmount[1],
                 setValue: value => _config.FertilizerWaterRetentionAmount[1] = value
             );
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Deluxe Retaining Soil Amount",
-                tooltip: () => "Modify the amount of Deluxe Retaining Soil you get per craft; default 1",
+                name: () => _helper.Translation.Get("config.deluxe_retaining_soil_amount.title"),
+                tooltip: () => _helper.Translation.Get("config.deluxe_retaining_soil_amount.tooltip"),
                 getValue: () => _config.FertilizerWaterRetentionAmount[2],
                 setValue: value => _config.FertilizerWaterRetentionAmount[2] = value
             );
@@ -353,6 +354,7 @@ namespace UltimateFertilizer {
                         if (!ContainSameTypes(__instance, fertilizerId)) {
                             __result = HoeDirtFertilizerApplyStatus.HasAnotherFertilizer;
                         }
+
                         break;
                     case "Vanilla":
                         __result = __instance.fertilizer.Value.Contains(fertilizerId)
@@ -417,7 +419,7 @@ namespace UltimateFertilizer {
                 if (!isFertilizer) {
                     return true;
                 }
-
+                
                 if (!__instance.CanApplyFertilizer(itemId)) {
                     __result = false;
                     return false;
@@ -446,6 +448,7 @@ namespace UltimateFertilizer {
                                     __instance.fertilizer.Value += itemId;
                                 }
                             }
+
                             break;
                         case "single-fertilizer-stack":
                             __instance.fertilizer.Value += "|";
