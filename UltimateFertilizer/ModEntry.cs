@@ -81,16 +81,16 @@ namespace UltimateFertilizer {
                 allowedValues: new[] {"Replace", "Stack", "Disable"}
             );
             configMenu.AddTextOption(
-                mod: this.ModManifest,
+                mod: ModManifest,
                 name: () => "Multi Same Type Fertilizer Mode",
-                getValue: () => _config.SameFertilizerMode,
                 tooltip: () =>
                     "Allow you to choose what happen when you apply multiple of the same type of fertilizer to a crop space.\n" +
                     "Replace: The fertilizer you use replaces the current one without refund; effectively an upgrade or downgrade.\n" +
                     "Stack: Same type of fertilizer stack their bonus; for example, applying a 10% and a 25% gives you a 35% bonus.\n" +
                     "Disable: You cannot apply fertilizer if it's the same type.\n" +
-                    "This config only applies when you use fertilizer, so if you've already mixed fertilizer on a tile then disable this option, those tiles still work.",
+                    "This config only applies when you use fertilizer, so if you've already mixed fertilizer on a tile then disable this option, those tiles still work.\n" +
                     "Requires Multi Fertilizer Mode As Stack to do anything.",
+                getValue: () => _config.SameFertilizerMode,
                 setValue: value => _config.SameFertilizerMode = value,
                 allowedValues: new[] {"Replace", "Stack", "Disable"}
             );
