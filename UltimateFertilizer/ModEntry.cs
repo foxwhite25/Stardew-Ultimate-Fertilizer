@@ -210,7 +210,8 @@ namespace UltimateFertilizer {
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Basic Retaining Soil Bonus",
-                tooltip: () => "Modify the chance of retaining water when using Basic Retaining Soil; default 33% (0.33)",
+                tooltip: () =>
+                    "Modify the chance of retaining water when using Basic Retaining Soil; default 33% (0.33)",
                 getValue: () => _config.FertilizerWaterRetentionBoost[0],
                 setValue: value => _config.FertilizerWaterRetentionBoost[0] = value
             );
@@ -225,7 +226,8 @@ namespace UltimateFertilizer {
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => "Deluxe Retaining Soil Bonus",
-                tooltip: () => "Modify the chance of retaining water when using Deluxe Retaining Soil; default 100% (1.0)",
+                tooltip: () =>
+                    "Modify the chance of retaining water when using Deluxe Retaining Soil; default 100% (1.0)",
                 getValue: () => _config.FertilizerWaterRetentionBoost[2],
                 setValue: value => _config.FertilizerWaterRetentionBoost[2] = value
             );
@@ -258,12 +260,13 @@ namespace UltimateFertilizer {
             }
         }
 
-        [HarmonyPatch(typeof(Crop), "harvest")]
+        [HarmonyPatch(typeof(Crop), nameof(Crop.harvest))]
         public static class Harvest {
             public static void Postfix(Crop __instance, HoeDirt soil) {
                 if (!_config.SpeedRemainAfterHarvest) {
                     return;
                 }
+
                 var data = __instance.GetData();
                 var regrow_day = data?.RegrowDays ?? -1;
                 if (regrow_day <= 0)
@@ -271,13 +274,14 @@ namespace UltimateFertilizer {
                 if (__instance.dayOfCurrentPhase.Value != regrow_day) {
                     return;
                 }
+
                 var speed = soil.GetFertilizerSpeedBoost();
                 __instance.dayOfCurrentPhase.Value = (int) Math.Ceiling(regrow_day * (1.0 - speed));
             }
         }
 
 
-        [HarmonyPatch(typeof(CraftingRecipe), "InitShared")]
+        [HarmonyPatch(typeof(CraftingRecipe), nameof(CraftingRecipe.InitShared))]
         public static class InitShared {
             public static void Postfix() {
                 foreach (var (key, value) in CraftingRecipe.craftingRecipes.ToArray()) {
@@ -316,7 +320,7 @@ namespace UltimateFertilizer {
         }
 
 
-        [HarmonyPatch(typeof(HoeDirt), "CheckApplyFertilizerRules")]
+        [HarmonyPatch(typeof(HoeDirt), nameof(HoeDirt.CheckApplyFertilizerRules))]
         public static class CheckApplyFertilizerRules {
             private static bool ContainSameType(
                 ICollection<string> fertilizers,
@@ -370,7 +374,7 @@ namespace UltimateFertilizer {
             }
         }
 
-        [HarmonyPatch(typeof(Object), "placementAction")]
+        [HarmonyPatch(typeof(Object), nameof(Object.placementAction))]
         public static class ObjectTranspiler {
             static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
                 var codes = new List<CodeInstruction>(instructions);
@@ -411,7 +415,7 @@ namespace UltimateFertilizer {
             }
         }
 
-        [HarmonyPatch(typeof(HoeDirt), "plant")]
+        [HarmonyPatch(typeof(HoeDirt), nameof(HoeDirt.plant))]
         public static class Plant {
             public static bool Prefix(
                 HoeDirt __instance,
@@ -437,6 +441,7 @@ namespace UltimateFertilizer {
                             __instance.fertilizer.Value = itemId;
                             return;
                         }
+
                         if (_config.SameFertilizerMode == "Replace") {
                             var fertilizerList = Fertilizers.Find(list => list.Contains(itemId));
                             if (fertilizerList != null) {
@@ -463,7 +468,8 @@ namespace UltimateFertilizer {
                 }
 
                 Print("Fertilizer value: " + __instance.fertilizer.Value);
-                if (_config.SpeedRemainAfterHarvest && __instance.crop != null &&  __instance.crop.dayOfCurrentPhase.Value != 0) {
+                if (_config.SpeedRemainAfterHarvest && __instance.crop != null &&
+                    __instance.crop.dayOfCurrentPhase.Value != 0) {
                     var data = __instance.crop.GetData();
                     var regrow_day = data?.RegrowDays ?? -1;
                     if (regrow_day > 0) {
@@ -471,9 +477,21 @@ namespace UltimateFertilizer {
                         __instance.crop.dayOfCurrentPhase.Value = (int) Math.Ceiling(regrow_day * (1.0 - speed));
                     }
                 }
+
                 __instance.applySpeedIncreases(who);
                 __instance.Location.playSound("dirtyHit");
                 return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(HoeDirt), nameof(HoeDirt.seasonUpdate))]
+        public static class SeasonUpdate {
+            public static void Prefix(
+                ref bool onLoad
+            ) {
+                if (_config.EnableKeepFertilizerAcrossSeason && !onLoad) {
+                    onLoad = true;
+                }
             }
         }
 
