@@ -18,8 +18,7 @@ namespace UltimateFertilizer {
         private static IMonitor? _logger;
 
         private class Config {
-            public string MultiFertilizerMode = "Stack";
-            public string SameFertilizerMode = "Disable";
+            public string FertilizerMode = "multi-fertilizer-stack";
 
             public bool EnableAlwaysFertilizer = true;
             public bool EnableKeepFertilizerAcrossSeason = true;
@@ -69,31 +68,22 @@ namespace UltimateFertilizer {
             configMenu.AddSectionTitle(mod: ModManifest, text: () => "Toggles");
             configMenu.AddTextOption(
                 mod: ModManifest,
-                name: () => "Multi Fertilizer Mode",
+                name: () => "Fertilizer Mode",
                 tooltip: () =>
-                    "Allows you to apply multiple types of fertilizer to a crop space.\n" +
-                    "Replace: The fertilizer you use replaces the current one without refund; effectively an upgrade or downgrade.\n" +
-                    "Stack: Fertilizer stack their bonus.\n" +
-                    "Disable: Vanilla behavior.\n" +
-                    "This config only applies when you use fertilizer, so if you've already mixed fertilizer on a tile then disable this option, those tiles still work.",
-                getValue: () => _config.MultiFertilizerMode,
-                setValue: value => _config.MultiFertilizerMode = value,
-                allowedValues: new[] {"Replace", "Stack", "Disable"}
+                    "Choose your fertilizer application mode: \n" +
+                    "multi-fertilizer-stack: Allows you to mix different types of fertilizers with varied levels on a single crop space.\n" +
+                    "multi-fertilizer-single-level: Allows you to mix different types of fertilizers but only at a single level on a crop space.\n" +
+                    "single-fertilizer-replace: Allows you to replace a single type of fertilizer at any time on a crop space.\n" +
+                    "single-fertilizer-stack: Allows you to stack a single type of fertilizer with different levels on a crop space.\n" +
+                    "Vanilla: Default Stardew Valley fertilizer behavior.\n" +
+                    "Note: This config only applies when you use fertilizer.\n" +
+                    "      If you've already mixed fertilizer on a tile and then disable this option, \n" +
+                    "      those tiles will still work as per the previous setting.",
+                getValue: () => _config.FertilizerMode,
+                setValue: value => _config.FertilizerMode = value,
+                allowedValues: new[] {"multi-fertilizer-stack", "multi-fertilizer-single-level", "single-fertilizer-replace", "single-fertilizer-stack", "Vanilla"}
             );
-            configMenu.AddTextOption(
-                mod: ModManifest,
-                name: () => "Multi Same Type Fertilizer Mode",
-                tooltip: () =>
-                    "Allow you to choose what happen when you apply multiple of the same type of fertilizer to a crop space.\n" +
-                    "Replace: The fertilizer you use replaces the current one without refund; effectively an upgrade or downgrade.\n" +
-                    "Stack: Same type of fertilizer stack their bonus; for example, applying a 10% and a 25% gives you a 35% bonus.\n" +
-                    "Disable: You cannot apply fertilizer if it's the same type.\n" +
-                    "This config only applies when you use fertilizer, so if you've already mixed fertilizer on a tile then disable this option, those tiles still work.\n" +
-                    "Requires Multi Fertilizer Mode As Stack to do anything.",
-                getValue: () => _config.SameFertilizerMode,
-                setValue: value => _config.SameFertilizerMode = value,
-                allowedValues: new[] {"Replace", "Stack", "Disable"}
-            );
+
             configMenu.AddBoolOption(
                 mod: ModManifest,
                 name: () => "Enable Fertilizer Anytime",
@@ -358,16 +348,17 @@ namespace UltimateFertilizer {
                     return false;
                 }
 
-
-                if (_config.MultiFertilizerMode != "Disable") {
-                    __result = __instance.fertilizer.Value.Contains(fertilizerId)
-                        ? HoeDirtFertilizerApplyStatus.HasAnotherFertilizer
-                        : HoeDirtFertilizerApplyStatus.HasThisFertilizer;
-                    return false;
-                }
-
-                if (_config.SameFertilizerMode == "Disable" && ContainSameTypes(__instance, fertilizerId)) {
-                    __result = HoeDirtFertilizerApplyStatus.HasThisFertilizer;
+                switch (_config.FertilizerMode) {
+                    case "single-fertilizer-stack":
+                        if (!ContainSameTypes(__instance, fertilizerId)) {
+                            __result = HoeDirtFertilizerApplyStatus.HasAnotherFertilizer;
+                        }
+                        break;
+                    case "Vanilla":
+                        __result = __instance.fertilizer.Value.Contains(fertilizerId)
+                            ? HoeDirtFertilizerApplyStatus.HasAnotherFertilizer
+                            : HoeDirtFertilizerApplyStatus.HasThisFertilizer;
+                        break;
                 }
 
                 return false;
@@ -436,13 +427,12 @@ namespace UltimateFertilizer {
                 __result = true;
 
                 if (__instance.fertilizer.Value is {Length: > 0}) {
-                    void DoApply() {
-                        if (_config.MultiFertilizerMode == "Replace") {
-                            __instance.fertilizer.Value = itemId;
-                            return;
-                        }
-
-                        if (_config.SameFertilizerMode == "Replace") {
+                    switch (_config.FertilizerMode) {
+                        case "multi-fertilizer-stack":
+                            __instance.fertilizer.Value += "|";
+                            __instance.fertilizer.Value += itemId;
+                            break;
+                        case "multi-fertilizer-single-level":
                             var fertilizerList = Fertilizers.Find(list => list.Contains(itemId));
                             if (fertilizerList != null) {
                                 var found = false;
@@ -451,17 +441,22 @@ namespace UltimateFertilizer {
                                     found = true;
                                 }
 
-                                if (found) {
-                                    return;
+                                if (!found) {
+                                    __instance.fertilizer.Value += "|";
+                                    __instance.fertilizer.Value += itemId;
                                 }
                             }
-                        }
-
-                        __instance.fertilizer.Value += "|";
-                        __instance.fertilizer.Value += itemId;
+                            break;
+                        case "single-fertilizer-stack":
+                            __instance.fertilizer.Value += "|";
+                            __instance.fertilizer.Value += itemId;
+                            break;
+                        case "single-fertilizer-replace":
+                            __instance.fertilizer.Value = itemId;
+                            break;
+                        case "Vanilla":
+                            break;
                     }
-
-                    DoApply();
                 }
                 else {
                     __instance.fertilizer.Value = itemId;
