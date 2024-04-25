@@ -18,9 +18,11 @@ namespace UltimateFertilizer {
         private static IMonitor? _logger;
 
         private class Config {
-            public bool EnableMultiFertilizer = true;
-            public bool EnableAlwaysFertilizer = true;
+            public string MultiFertilizerMode = "Stack";
             public string SameFertilizerMode = "Disable";
+
+            public bool EnableAlwaysFertilizer = true;
+            public bool EnableKeepFertilizerAcrossSeason = true;
 
             // ReSharper disable FieldCanBeMadeReadOnly.Local
             public List<float> FertilizerSpeedBoost = new() {0.1f, 0.25f, 0.33f};
@@ -65,14 +67,17 @@ namespace UltimateFertilizer {
             );
 
             configMenu.AddSectionTitle(mod: ModManifest, text: () => "Toggles");
-            configMenu.AddBoolOption(
+            configMenu.AddTextOption(
                 mod: ModManifest,
-                name: () => "Enable Multi Fertilizer",
+                name: () => "Multi Fertilizer Mode",
                 tooltip: () =>
                     "Allow you to apply multiple types of fertilizer to a crop space.\n" +
+                    "Replace: The fertilizer you use would replace the current one without refund, effectively a upgrade or downgrade.\n" +
+                    "Stack: Fertilizer stack their bonus.\n" +
+                    "Disable: Vanilla behavior.\n" +
                     "Config only apply when you use fertilizer, this means if your map already have mixed fertilizer, they still works.",
-                getValue: () => _config.EnableMultiFertilizer,
-                setValue: value => _config.EnableMultiFertilizer = value
+                getValue: () => _config.MultiFertilizerMode,
+                setValue: value => _config.MultiFertilizerMode = value
             );
             configMenu.AddTextOption(
                 mod: this.ModManifest,
@@ -84,7 +89,7 @@ namespace UltimateFertilizer {
                     "Stack: same type of fertilizer stack their bonus, applying a 10% and a 25% gives you a 35% bonus.\n" +
                     "Disable: You can not apply fertilizer if it's the same type.\n" +
                     "Config only apply when you use fertilizer, this means if your map already have mixed fertilizer, they still works.\n" +
-                    "Requires Enable Multi Fertilizer to do anything.",
+                    "Requires Multi Fertilizer Mode As Stack to do anything.",
                 setValue: value => _config.SameFertilizerMode = value,
                 allowedValues: new[] {"Replace", "Stack", "Disable"}
             );
@@ -94,6 +99,13 @@ namespace UltimateFertilizer {
                 tooltip: () => "Allow you to apply fertilizer to a crop space that have grown crops.",
                 getValue: () => _config.EnableAlwaysFertilizer,
                 setValue: value => _config.EnableAlwaysFertilizer = value
+            );
+            configMenu.AddBoolOption(
+                mod: ModManifest,
+                name: () => "Keep Fertilizer Across Season",
+                tooltip: () => "Allow fertilizers to not disappear between seasons.",
+                getValue: () => _config.EnableKeepFertilizerAcrossSeason,
+                setValue: value => _config.EnableKeepFertilizerAcrossSeason = value
             );
 
 
@@ -342,7 +354,7 @@ namespace UltimateFertilizer {
                 }
 
 
-                if (!_config.EnableMultiFertilizer) {
+                if (_config.MultiFertilizerMode != "Disable") {
                     __result = __instance.fertilizer.Value.Contains(fertilizerId)
                         ? HoeDirtFertilizerApplyStatus.HasAnotherFertilizer
                         : HoeDirtFertilizerApplyStatus.HasThisFertilizer;
@@ -420,6 +432,10 @@ namespace UltimateFertilizer {
 
                 if (__instance.fertilizer.Value is {Length: > 0}) {
                     void DoApply() {
+                        if (_config.MultiFertilizerMode == "Replace") {
+                            __instance.fertilizer.Value = itemId;
+                            return;
+                        }
                         if (_config.SameFertilizerMode == "Replace") {
                             var fertilizerList = Fertilizers.Find(list => list.Contains(itemId));
                             if (fertilizerList != null) {
