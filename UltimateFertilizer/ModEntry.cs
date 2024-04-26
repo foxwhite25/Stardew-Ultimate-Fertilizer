@@ -73,17 +73,31 @@ namespace UltimateFertilizer {
                 name: () => _helper.Translation.Get("config.fertilizer_mode.title"),
                 tooltip: () =>
                     $"{_helper.Translation.Get("config.fertilizer_mode.tooltip.choose")}" +
-                    $"{_helper.Translation.Get("config.fertilizer_mode.tooltip.multi-fertilizer-stack")}" +
-                    $"{_helper.Translation.Get("config.fertilizer_mode.tooltip.multi-fertilizer-single-level")}" +
-                    $"{_helper.Translation.Get("config.fertilizer_mode.tooltip.single-fertilizer-replace")}" +
-                    $"{_helper.Translation.Get("config.fertilizer_mode.tooltip.single-fertilizer-stack")}" +
-                    $"{_helper.Translation.Get("config.fertilizer_mode.tooltip.vanilla")}" +
+                    $"{_helper.Translation.Get("config.fertilizer_mode.option.multi-fertilizer-stack")}: {_helper.Translation.Get("config.fertilizer_mode.tooltip.multi-fertilizer-stack")}" +
+                    $"{_helper.Translation.Get("config.fertilizer_mode.option.multi-fertilizer-single-level")}: {_helper.Translation.Get("config.fertilizer_mode.tooltip.multi-fertilizer-single-level")}" +
+                    $"{_helper.Translation.Get("config.fertilizer_mode.option.single-fertilizer-replace")}: {_helper.Translation.Get("config.fertilizer_mode.tooltip.single-fertilizer-replace")}" +
+                    $"{_helper.Translation.Get("config.fertilizer_mode.option.single-fertilizer-stack")}: {_helper.Translation.Get("config.fertilizer_mode.tooltip.single-fertilizer-stack")}" +
+                    $"{_helper.Translation.Get("config.fertilizer_mode.option.vanilla")}: {_helper.Translation.Get("config.fertilizer_mode.tooltip.vanilla")}" +
                     $"{_helper.Translation.Get("config.fertilizer_mode.tooltip.note")}",
                 getValue: () => _config.FertilizerMode,
                 setValue: value => _config.FertilizerMode = value,
                 allowedValues: new[] {
                     "multi-fertilizer-stack", "multi-fertilizer-single-level", "single-fertilizer-replace",
                     "single-fertilizer-stack", "Vanilla"
+                },
+                formatAllowedValue: s => {
+                    return s switch {
+                        "multi-fertilizer-stack" => _helper.Translation.Get(
+                            "config.fertilizer_mode.option.multi-fertilizer-stack"),
+                        "multi-fertilizer-single-level" => _helper.Translation.Get(
+                            "config.fertilizer_mode.option.multi-fertilizer-single-level"),
+                        "single-fertilizer-replace" => _helper.Translation.Get(
+                            "config.fertilizer_mode.option.single-fertilizer-replace"),
+                        "single-fertilizer-stack" => _helper.Translation.Get(
+                            "config.fertilizer_mode.option.single-fertilizer-stack"),
+                        "Vanilla" => _helper.Translation.Get("config.fertilizer_mode.option.vanilla"),
+                        _ => s
+                    };
                 }
             );
 
@@ -419,7 +433,7 @@ namespace UltimateFertilizer {
                 if (!isFertilizer) {
                     return true;
                 }
-                
+
                 if (!__instance.CanApplyFertilizer(itemId)) {
                     __result = false;
                     return false;

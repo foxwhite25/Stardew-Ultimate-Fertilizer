@@ -3,13 +3,18 @@
   
   "config.fertilizer_mode.title": "비료 모드",
   "config.fertilizer_mode.tooltip.choose": "비료 적용 모드 선택: \n",
-  "config.fertilizer_mode.tooltip.multi-fertilizer-stack": "multi-fertilizer-stack: 다양한 종류의 비료를 한 칸에 섞어 사용할 수 있습니다.\n",
-  "config.fertilizer_mode.tooltip.multi-fertilizer-single-level": "multi-fertilizer-single-level: 다양한 종류의 비료를 사용할 수 있지만 한 수준에서만 섞어 사용할 수 있습니다.\n",
-  "config.fertilizer_mode.tooltip.single-fertilizer-replace": "single-fertilizer-replace: 언제든지 한 종류의 비료를 대체할 수 있습니다.\n",
-  "config.fertilizer_mode.tooltip.single-fertilizer-stack": "single-fertilizer-stack: 한 종류의 비료를 다른 수준에서 섞어 사용할 수 있습니다.\n",
-  "config.fertilizer_mode.tooltip.vanilla": "Vanilla: 기본 Stardew Valley 비료 동작입니다.\n",
+  "config.fertilizer_mode.tooltip.multi-fertilizer-stack": "다양한 종류의 비료를 한 칸에 섞어 사용할 수 있습니다.\n",
+  "config.fertilizer_mode.tooltip.multi-fertilizer-single-level": "다양한 종류의 비료를 사용할 수 있지만 한 수준에서만 섞어 사용할 수 있습니다.\n",
+  "config.fertilizer_mode.tooltip.single-fertilizer-replace": "언제든지 한 종류의 비료를 대체할 수 있습니다.\n",
+  "config.fertilizer_mode.tooltip.single-fertilizer-stack": "한 종류의 비료를 다른 수준에서 섞어 사용할 수 있습니다.\n",
+  "config.fertilizer_mode.tooltip.vanilla": "기본 Stardew Valley 비료 동작입니다.\n",
   "config.fertilizer_mode.tooltip.note": "참고: 이 설정은 비료를 사용할 때만 적용됩니다.\n      이미 비료를 섞은 타일을 사용하지 않도록 설정을 해제하면,\n      해당 타일은 이전 설정대로 작동합니다.",
-  
+  "config.fertilizer_mode.option.multi-fertilizer-stack": "multi-fertilizer-stack",
+  "config.fertilizer_mode.option.multi-fertilizer-single-level": "multi-fertilizer-single-level",
+  "config.fertilizer_mode.option.single-fertilizer-replace": "single-fertilizer-replace",
+  "config.fertilizer_mode.option.single-fertilizer-stack": "single-fertilizer-stack",
+  "config.fertilizer_mode.option.vanilla": "Vanilla",
+
   "config.enable_fertilizer_anytime.title": "언제든지 비료 사용 가능",
   "config.enable_fertilizer_anytime.tooltip": "이미 작물이 있는 농작물 영역에 비료를 적용할 수 있도록 합니다.",
   
