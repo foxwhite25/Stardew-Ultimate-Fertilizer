@@ -36,7 +36,7 @@ namespace UltimateFertilizer {
         }
 
         private static Config _config = null!;
-        private const bool DebugMode = true;
+        private const bool DebugMode = false;
         private static IModHelper _helper = null!;
 
         public override void Entry(IModHelper helper) {
