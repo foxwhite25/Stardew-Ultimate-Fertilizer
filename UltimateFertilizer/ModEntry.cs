@@ -36,7 +36,7 @@ namespace UltimateFertilizer {
         }
 
         private static Config _config = null!;
-        private const bool DebugMode = false;
+        private const bool DebugMode = true;
         private static IModHelper _helper = null!;
 
         public override void Entry(IModHelper helper) {
@@ -46,7 +46,7 @@ namespace UltimateFertilizer {
             _harmony = new Harmony(ModManifest.UniqueID);
             _harmony.PatchAll();
             helper.Events.GameLoop.GameLaunched += OnGameLaunched!;
-            helper.Events.GameLoop.SaveLoaded += (object sender, SaveLoadedEventArgs e) => { InitShared.Postfix(); };
+            helper.Events.GameLoop.SaveLoaded += (_, _) => { InitShared.Postfix(); };
 
             Monitor.Log("Plugin is now working.", LogLevel.Info);
         }
@@ -506,6 +506,47 @@ namespace UltimateFertilizer {
                 }
             }
         }
+
+        [HarmonyPatch(typeof(HoeDirt), nameof(HoeDirt.applySpeedIncreases))]
+        public static class ApplySpeedIncrease {
+            private static bool Prefix(
+                HoeDirt __instance,
+                Farmer who
+            ) {
+                if (__instance.crop == null)
+                    return false;
+                var isCropWatered = __instance.Location != null && __instance.paddyWaterCheck();
+                var fertilizerBoost = __instance.GetFertilizerSpeedBoost();
+                if (((fertilizerBoost != 0.0 ? 1 : (who.professions.Contains(5) ? 1 : 0)) | (isCropWatered ? 1 : 0)) ==
+                    0)
+                    return false;
+                __instance.crop.ResetPhaseDays();
+                var totalPhaseDays = 0;
+                for (var i = 0; i < __instance.crop.phaseDays.Count - 1; ++i)
+                    totalPhaseDays += __instance.crop.phaseDays[i];
+                var totalBoost = fertilizerBoost;
+                if (isCropWatered)
+                    totalBoost += 0.25f;
+                if (who.professions.Contains(5))
+                    totalBoost += 0.1f;
+                var totalDaysToDecrease = (long) Math.Ceiling(totalPhaseDays * (double) totalBoost);
+                for (var i = 0; totalDaysToDecrease > 0 && i < 99; ++i) {
+                    for (var j = 0; j < __instance.crop.phaseDays.Count; ++j) {
+                        if ((j > 0 || __instance.crop.phaseDays[j] > 1) && __instance.crop.phaseDays[j] != 99999 &&
+                            __instance.crop.phaseDays[j] > 0) {
+                            __instance.crop.phaseDays[j]--;
+                            --totalDaysToDecrease;
+                        }
+
+                        if (totalDaysToDecrease <= 0)
+                            break;
+                    }
+                }
+
+                return false;
+            }
+        }
+
 
         private static readonly List<string> FertilizerSpeed = new() {
             HoeDirt.speedGroQID, HoeDirt.superSpeedGroQID, HoeDirt.hyperSpeedGroQID
