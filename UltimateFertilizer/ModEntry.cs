@@ -498,8 +498,9 @@ namespace UltimateFertilizer {
                     return true;
                 }
 
-                if (!ApplyFertilizerOnDirt(__instance, itemId, who)) {
-                    __result = false;
+                __result = ApplyFertilizerOnDirt(__instance, itemId, who);
+
+                if (!__result) {
                     return false;
                 }
 
