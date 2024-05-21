@@ -47,7 +47,10 @@
   
   
   "config.section.quality_fertilizer": "고급 비료",
-  
+
+  "config.fix_multi_drop.title": "Fix Multi Drop Bug",
+  "config.fix_multi_drop.tooltip": "In vanilla only the first piece of multi drop crops harvested that day will get the bonus.\nThis patch fixes this bug and make it so that every drop would have the same quality as the first one.",
+
   "config.basic_fertilizer_bonus.title": "기본 비료 보너스",
   "config.basic_fertilizer_bonus.tooltip": "기본 비료의 품질 보너스를 수정합니다. 기본값은 1입니다.",
   

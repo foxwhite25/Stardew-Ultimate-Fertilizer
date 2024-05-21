@@ -48,6 +48,9 @@
   
   "config.section.quality_fertilizer": "Quality Fertilizer",
   
+  "config.fix_multi_drop.title": "Fix Multi Drop Bug",
+  "config.fix_multi_drop.tooltip": "In vanilla only the first piece of multi drop crops harvested that day will get the bonus.\nThis patch fixes this bug and make it so that every drop would have the same quality as the first one.",
+
   "config.basic_fertilizer_bonus.title": "Basic Fertilizer Bonus",
   "config.basic_fertilizer_bonus.tooltip": "Modify the quality bonus from Basic Fertilizer; default 1",
   

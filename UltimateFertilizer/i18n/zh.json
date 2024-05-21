@@ -48,6 +48,9 @@
 
   "config.section.quality_fertilizer": "质量肥料",
 
+  "config.fix_multi_drop.title": "修复多掉落植物",
+  "config.fix_multi_drop.tooltip": "在原版多掉落植物只有第一个能享受到质量肥料加成，\n这补丁使得剩余的其他物品都会有第一个的质量",
+
   "config.basic_fertilizer_bonus.title": "初级肥料加成",
   "config.basic_fertilizer_bonus.tooltip": "修改初级肥料的质量加成；默认 1",
 

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
@@ -6,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.GameData.Crops;
 using StardewValley.TerrainFeatures;
 using Object = StardewValley.Object;
 
@@ -30,13 +32,14 @@ namespace UltimateFertilizer {
 
             public List<int> FertilizerQualityBoost = new() {1, 2, 3};
             public List<int> FertilizerQualityAmount = new() {1, 2, 5};
+            public bool FixMultiDropBug = false;
 
             public List<float> FertilizerWaterRetentionBoost = new() {0.33f, 0.66f, 1.0f};
             public List<int> FertilizerWaterRetentionAmount = new() {1, 2, 1};
         }
 
         private static Config _config = null!;
-        private const bool DebugMode = false;
+        private const bool DebugMode = true;
         private static IModHelper _helper = null!;
 
         public override void Entry(IModHelper helper) {
@@ -215,6 +218,13 @@ namespace UltimateFertilizer {
                 tooltip: () => _helper.Translation.Get("config.deluxe_fertilizer_amount.tooltip"),
                 getValue: () => _config.FertilizerQualityAmount[2],
                 setValue: value => _config.FertilizerQualityAmount[2] = value
+            );
+            configMenu.AddBoolOption(
+                mod: ModManifest,
+                name: () => _helper.Translation.Get("config.fix_multi_drop.title"),
+                tooltip: () => _helper.Translation.Get("config.fix_multi_drop.tooltip"),
+                getValue: () => _config.FixMultiDropBug,
+                setValue: value => _config.FixMultiDropBug = value
             );
 
             configMenu.AddSectionTitle(mod: ModManifest,
@@ -686,6 +696,76 @@ namespace UltimateFertilizer {
                         0.0f, Vector2.Zero, 4f, SpriteEffects.None, layer);
                     layer += 1E-09f;
                 }
+            }
+        }
+
+        private static bool in_harvest;
+        private static bool harvested;
+        private static HoeDirt? current_crop;
+        private static Random? rng;
+
+        [HarmonyPatch(typeof(Crop), nameof(Crop.harvest))]
+        public static class HarvestSentinel {
+            public static void Prefix(
+                int xTile,
+                int yTile, HoeDirt soil
+            ) {
+                in_harvest = true;
+                current_crop = soil;
+                rng = Utility.CreateRandom(
+                    xTile * 7.0,
+                    yTile * 11.0,
+                    Game1.stats.DaysPlayed,
+                    Game1.uniqueIDForThisGame
+                );
+            }
+
+            public static void Postfix() {
+                in_harvest = false;
+                harvested = false;
+                current_crop = null;
+                rng = null;
+            }
+        }
+
+        [HarmonyPatch]
+        public static class ItemCreatePatch {
+            static MethodBase TargetMethod() {
+                return AccessTools.FirstMethod(typeof(ItemRegistry), method => method.Name.Contains("Create"));
+            }
+
+            public static void Prefix(ref int quality) {
+                if (!in_harvest || !_config.FixMultiDropBug) {
+                    return;
+                }
+
+                if (quality != 0) {
+                    harvested = true;
+                    return;
+                }
+
+                if (!harvested || current_crop == null || rng == null) {
+                    return;
+                }
+
+                var crop = current_crop.crop;
+                var data = crop.GetData();
+                var qualityBoostLevel = current_crop.GetFertilizerQualityBoostLevel();
+                var num1 = 0.2 * (Game1.player.FarmingLevel / 10.0) + 0.2 * qualityBoostLevel *
+                    ((Game1.player.FarmingLevel + 2.0) / 12.0) + 0.01;
+                var num2 = Math.Min(0.75, num1 * 2.0);
+                var num3 = 0;
+                if (qualityBoostLevel >= 3 && rng.NextDouble() < num1 / 2.0)
+                    num3 = 4;
+                else if (rng.NextDouble() < num1)
+                    num3 = 2;
+                else if (rng.NextDouble() < num2 || qualityBoostLevel >= 3)
+                    num3 = 1;
+                var num4 = num3;
+                var harvestMinQuality = data?.HarvestMinQuality ?? 0;
+                var nullable = data?.HarvestMaxQuality;
+                var max = nullable ?? num3;
+                quality = MathHelper.Clamp(num4, harvestMinQuality, max);
             }
         }
     }
