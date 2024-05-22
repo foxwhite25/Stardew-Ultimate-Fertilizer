@@ -731,7 +731,7 @@ namespace UltimateFertilizer {
         [HarmonyPatch]
         public static class ItemCreatePatch {
             static MethodBase TargetMethod() {
-                return AccessTools.FirstMethod(typeof(ItemRegistry), method => method.Name.Contains("Create"));
+                return AccessTools.FirstMethod(typeof(ItemRegistry), method => method.Name.Contains("Create") && !method.IsGenericMethod);
             }
 
             public static void Prefix(ref int quality) {
