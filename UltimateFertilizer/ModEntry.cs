@@ -42,7 +42,7 @@ namespace UltimateFertilizer {
         }
 
         private static Config _config = null!;
-        private const bool DebugMode = true;
+        private const bool DebugMode = false;
         private static IModHelper _helper = null!;
 
         public override void Entry(IModHelper helper) {
@@ -365,13 +365,13 @@ namespace UltimateFertilizer {
                 var new_index = fertilizers.IndexOf(newFertilizerId);
                 Print("New index: " + new_index);
                 Print("New Fertilizer: " + newFertilizerId);
-                if ( new_index == -1) {
+                if (new_index == -1) {
                     return true;
                 }
 
                 var current_index = fertilizers.TakeWhile(s => !currentFertilizerId.Contains(s)).Count();
                 Print("Current index: " + current_index);
-                if ( current_index == fertilizers.Count) {
+                if (current_index == fertilizers.Count) {
                     return true;
                 }
 
@@ -412,16 +412,19 @@ namespace UltimateFertilizer {
                         if (ValidSingleStack(__instance, fertilizerId)) {
                             __result = HoeDirtFertilizerApplyStatus.HasAnotherFertilizer;
                         }
+
                         break;
                     case "multi-fertilizer-single-level":
                     case "single-fertilizer-replace":
                         if (_config.ReplaceHighTier) {
                             break;
                         }
+
                         if (!Fertilizers.All(fertilizer =>
                                 CheckUpgrade(fertilizer, fertilizerId, __instance.fertilizer.Value))) {
                             __result = HoeDirtFertilizerApplyStatus.HasAnotherFertilizer;
                         }
+
                         break;
                     case "Vanilla":
                         __result = __instance.fertilizer.Value.Contains(fertilizerId)
@@ -622,7 +625,7 @@ namespace UltimateFertilizer {
             HoeDirt.waterRetentionSoilQID, HoeDirt.waterRetentionSoilQualityQID, HoeDirt.waterRetentionSoilDeluxeQID
         };
 
-        public static List<List<string>> Fertilizers = new()
+        public static readonly List<List<string>> Fertilizers = new()
             {FertilizerSpeed, FertilizerQuality, FertilizerWaterRetention};
 
         [HarmonyPatch(typeof(HoeDirt), "GetFertilizerSpeedBoost")]
@@ -734,8 +737,11 @@ namespace UltimateFertilizer {
                 var color = new Color(Color.White, _config.FertilizerAlpha) * alphaRatio; // Premultiply
 
                 foreach (var id in __instance.fertilizer.Value.Split("|")) {
-                    fert_batch.Draw(Game1.mouseCursors, local, GetFertilizerSourceRect(id), color,
-                        0.0f, Vector2.Zero, 4f, SpriteEffects.None, layer);
+                    fert_batch.Draw(
+                        Game1.mouseCursors, local,
+                        GetFertilizerSourceRect(id), color,
+                        0.0f, Vector2.Zero, 4f, SpriteEffects.None, layer
+                    );
                     layer += 1.9E-08f;
                 }
             }
@@ -773,8 +779,9 @@ namespace UltimateFertilizer {
         [HarmonyPatch]
         public static class ItemCreatePatch {
             static MethodBase TargetMethod() {
-                return AccessTools.FirstMethod(typeof(ItemRegistry),
-                    method => method.Name.Contains("Create") && !method.IsGenericMethod);
+                return AccessTools.FirstMethod(
+                    typeof(ItemRegistry), method => method.Name.Contains("Create") && !method.IsGenericMethod
+                );
             }
 
             public static void Prefix(ref int quality) {
