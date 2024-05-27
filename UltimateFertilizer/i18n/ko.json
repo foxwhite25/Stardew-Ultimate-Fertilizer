@@ -15,13 +15,19 @@
   "config.fertilizer_mode.option.single-fertilizer-stack": "single-fertilizer-stack",
   "config.fertilizer_mode.option.vanilla": "Vanilla",
 
+  "config.replace_high_tier.title": "고등급 비료 교체",
+  "config.replace_high_tier.tooltip": "비료를 다운그레이드할 수 있는지 여부.",
+
   "config.enable_fertilizer_anytime.title": "언제든지 비료 사용 가능",
   "config.enable_fertilizer_anytime.tooltip": "이미 작물이 있는 농작물 영역에 비료를 적용할 수 있도록 합니다.",
   
   "config.keep_fertilizer_across_season.title": "계절 간 비료 유지",
   "config.keep_fertilizer_across_season.tooltip": "비료가 계절 전환 시 사라지지 않도록 합니다.",
-  
-  
+
+  "config.fertilizer_alpha.title": "비료 알파",
+  "config.fertilizer_alpha.tooltip": "비료 스프라이트의 투명도; 기본값 255; 범위 0-255",
+
+
   "config.section.speed_fertilizer": "성장 촉진제",
   
   "config.affect_multi_harvest.title": "다수 수확에 영향 주기",

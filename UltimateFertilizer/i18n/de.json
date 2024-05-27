@@ -15,13 +15,19 @@
   "config.fertilizer_mode.option.single-fertilizer-stack": "single-fertilizer-stack",
   "config.fertilizer_mode.option.vanilla": "Vanilla",
 
+  "config.replace_high_tier.title": "Ersetze hochrangigen Dünger",
+  "config.replace_high_tier.tooltip": "Ob der Ersetzungsmodus Dünger herabstufen kann.",
+
   "config.enable_fertilizer_anytime.title": "Erlaube Dünger jederzeit",
   "config.enable_fertilizer_anytime.tooltip": "Erlaube das düngen eines Felds dass bereits eine Pflanze beinhaltet",
   
   "config.keep_fertilizer_across_season.title": "Behalte Dünger zwischen den Jahreszeiten",
   "config.keep_fertilizer_across_season.tooltip": "Erlaube dass Dünger zwischen den Jahreszeiten nicht verschwindet",
   
-  
+  "config.fertilizer_alpha.title": "Dünger Alpha",
+  "config.fertilizer_alpha.tooltip": "Transparenz des Dünger-Sprites; Standard 255; Bereich 0-255",
+
+
   "config.section.speed_fertilizer": "Geschwindigkeits Dünger",
   
   "config.affect_multi_harvest.title": "Betrifft Pflanzen mit mehreren Ernten",
