@@ -25,7 +25,7 @@
   "config.keep_fertilizer_across_season.tooltip": "允许肥料在季节更替时不消失。",
 
   "config.fertilizer_alpha.title": "肥料透明度",
-  "config.fertilizer_alpha.tooltip": "肥料精灵的透明度；默认255；范围0-255",
+  "config.fertilizer_alpha.tooltip": "肥料的透明度；默认255；范围0-255",
 
   
   "config.section.speed_fertilizer": "生长激素",
