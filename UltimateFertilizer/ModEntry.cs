@@ -24,6 +24,9 @@ namespace UltimateFertilizer {
 
             public bool EnableAlwaysFertilizer = true;
             public bool EnableKeepFertilizerAcrossSeason = true;
+            public bool ReplaceHighTier = true;
+
+            public byte FertilizerAlpha = 255;
 
             // ReSharper disable FieldCanBeMadeReadOnly.Local
             public List<float> FertilizerSpeedBoost = new() {0.1f, 0.25f, 0.33f};
@@ -39,7 +42,7 @@ namespace UltimateFertilizer {
         }
 
         private static Config _config = null!;
-        private const bool DebugMode = false;
+        private const bool DebugMode = true;
         private static IModHelper _helper = null!;
 
         public override void Entry(IModHelper helper) {
@@ -107,7 +110,13 @@ namespace UltimateFertilizer {
                     };
                 }
             );
-
+            configMenu.AddBoolOption(
+                mod: ModManifest,
+                name: () => _helper.Translation.Get("config.replace_high_tier.title"),
+                tooltip: () => _helper.Translation.Get("config.replace_high_tier.tooltip"),
+                getValue: () => _config.ReplaceHighTier,
+                setValue: value => _config.ReplaceHighTier = value
+            );
             configMenu.AddBoolOption(
                 mod: ModManifest,
                 name: () => _helper.Translation.Get("config.enable_fertilizer_anytime.title"),
@@ -121,6 +130,13 @@ namespace UltimateFertilizer {
                 tooltip: () => _helper.Translation.Get("config.keep_fertilizer_across_season.tooltip"),
                 getValue: () => _config.EnableKeepFertilizerAcrossSeason,
                 setValue: value => _config.EnableKeepFertilizerAcrossSeason = value
+            );
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => _helper.Translation.Get("config.fertilizer_alpha.title"),
+                tooltip: () => _helper.Translation.Get("config.fertilizer_alpha.tooltip"),
+                getValue: () => _config.FertilizerAlpha,
+                setValue: value => _config.FertilizerAlpha = (byte) Math.Max(Math.Min(value, 255), 0)
             );
 
             configMenu.AddSectionTitle(mod: ModManifest,
@@ -341,20 +357,34 @@ namespace UltimateFertilizer {
 
         [HarmonyPatch(typeof(HoeDirt), nameof(HoeDirt.CheckApplyFertilizerRules))]
         public static class CheckApplyFertilizerRules {
-            private static bool ContainSameType(
-                ICollection<string> fertilizers,
+            private static bool CheckUpgrade(
+                IList<string> fertilizers,
                 string newFertilizerId,
                 string currentFertilizerId
             ) {
-                return fertilizers.Contains(newFertilizerId) &&
-                       fertilizers.Any(currentFertilizerId.Contains);
+                var new_index = fertilizers.IndexOf(newFertilizerId);
+                Print("New index: " + new_index);
+                Print("New Fertilizer: " + newFertilizerId);
+                if ( new_index == -1) {
+                    return true;
+                }
+
+                var current_index = fertilizers.TakeWhile(s => !currentFertilizerId.Contains(s)).Count();
+                Print("Current index: " + current_index);
+                if ( current_index == fertilizers.Count) {
+                    return true;
+                }
+
+                return new_index > current_index;
             }
 
-            private static bool ContainSameTypes(HoeDirt dirt, string fertilizerId) {
-                return Fertilizers.Any(
-                    fertilizer =>
-                        ContainSameType(fertilizer, fertilizerId, dirt.fertilizer.Value)
-                );
+            private static bool ValidSingleStack(HoeDirt dirt, string fertilizerId) {
+                var fertilizer_type = Fertilizers.Find(fertilizer => fertilizer.Contains(fertilizerId));
+                if (fertilizer_type == null) {
+                    return dirt.fertilizer.Value.Length != 0;
+                }
+
+                return dirt.fertilizer.Value.Split("|").All(fertilizer_type.Contains);
             }
 
             public static bool Prefix(
@@ -379,10 +409,19 @@ namespace UltimateFertilizer {
 
                 switch (_config.FertilizerMode) {
                     case "single-fertilizer-stack":
-                        if (!ContainSameTypes(__instance, fertilizerId)) {
+                        if (ValidSingleStack(__instance, fertilizerId)) {
                             __result = HoeDirtFertilizerApplyStatus.HasAnotherFertilizer;
                         }
-
+                        break;
+                    case "multi-fertilizer-single-level":
+                    case "single-fertilizer-replace":
+                        if (_config.ReplaceHighTier) {
+                            break;
+                        }
+                        if (!Fertilizers.All(fertilizer =>
+                                CheckUpgrade(fertilizer, fertilizerId, __instance.fertilizer.Value))) {
+                            __result = HoeDirtFertilizerApplyStatus.HasAnotherFertilizer;
+                        }
                         break;
                     case "Vanilla":
                         __result = __instance.fertilizer.Value.Contains(fertilizerId)
@@ -691,10 +730,13 @@ namespace UltimateFertilizer {
                 if (fert_batch == null || !__instance.HasFertilizer()) return;
                 var local = Game1.GlobalToLocal(Game1.viewport, __instance.Tile * 64f);
                 var layer = 1.9E-08f;
+                var alphaRatio = _config.FertilizerAlpha / 255f; // Normalize alpha to 0-1 range
+                var color = new Color(Color.White, _config.FertilizerAlpha) * alphaRatio; // Premultiply
+
                 foreach (var id in __instance.fertilizer.Value.Split("|")) {
-                    fert_batch.Draw(Game1.mouseCursors, local, GetFertilizerSourceRect(id), Color.White,
+                    fert_batch.Draw(Game1.mouseCursors, local, GetFertilizerSourceRect(id), color,
                         0.0f, Vector2.Zero, 4f, SpriteEffects.None, layer);
-                    layer += 1E-09f;
+                    layer += 1.9E-08f;
                 }
             }
         }
@@ -731,7 +773,8 @@ namespace UltimateFertilizer {
         [HarmonyPatch]
         public static class ItemCreatePatch {
             static MethodBase TargetMethod() {
-                return AccessTools.FirstMethod(typeof(ItemRegistry), method => method.Name.Contains("Create") && !method.IsGenericMethod);
+                return AccessTools.FirstMethod(typeof(ItemRegistry),
+                    method => method.Name.Contains("Create") && !method.IsGenericMethod);
             }
 
             public static void Prefix(ref int quality) {
