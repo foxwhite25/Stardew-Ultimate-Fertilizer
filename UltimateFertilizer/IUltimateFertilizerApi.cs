@@ -19,5 +19,6 @@ public interface IUltimateFertilizerApi {
 
     /// <summary>Register fertilizer types.</summary>
     /// <param name="itemIds">A collection of fertilizer itemIds that are considered same type.</param>
+    /// <remarks>The fertilizer should be tiered from low to high.</remarks>
     void RegisterFertilizerType(IEnumerable<string> itemIds);
 }
