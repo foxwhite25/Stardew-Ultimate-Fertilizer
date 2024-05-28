@@ -42,7 +42,7 @@ namespace UltimateFertilizer {
         }
 
         private static Config _config = null!;
-        private const bool DebugMode = false;
+        private const bool DebugMode = true;
         private static IModHelper _helper = null!;
 
         public override void Entry(IModHelper helper) {
@@ -328,7 +328,7 @@ namespace UltimateFertilizer {
                         "Basic Fertilizer" => _config.FertilizerQualityAmount[0],
                         "Quality Fertilizer" => _config.FertilizerQualityAmount[1],
                         "Deluxe Fertilizer" => _config.FertilizerQualityAmount[2],
-                        "Basic Retaining Soil" => _config.FertilizerQualityAmount[0],
+                        "Basic Retaining Soil" => _config.FertilizerWaterRetentionAmount[0],
                         "Quality Retaining Soil" => _config.FertilizerWaterRetentionAmount[1],
                         "Deluxe Retaining Soil" => _config.FertilizerWaterRetentionAmount[2],
                         _ => -1
