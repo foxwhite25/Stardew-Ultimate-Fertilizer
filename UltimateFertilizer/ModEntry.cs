@@ -25,6 +25,7 @@ namespace UltimateFertilizer {
             public bool EnableAlwaysFertilizer = true;
             public bool EnableKeepFertilizerAcrossSeason = true;
             public bool ReplaceHighTier = true;
+            public bool DebugMode = false;
 
             public byte FertilizerAlpha = 255;
 
@@ -42,7 +43,6 @@ namespace UltimateFertilizer {
         }
 
         private static Config _config = null!;
-        private const bool DebugMode = true;
         private static IModHelper _helper = null!;
 
         public override void Entry(IModHelper helper) {
@@ -137,6 +137,13 @@ namespace UltimateFertilizer {
                 tooltip: () => _helper.Translation.Get("config.fertilizer_alpha.tooltip"),
                 getValue: () => _config.FertilizerAlpha,
                 setValue: value => _config.FertilizerAlpha = (byte) Math.Max(Math.Min(value, 255), 0)
+            );
+            configMenu.AddBoolOption(
+                mod: ModManifest,
+                name: () => _helper.Translation.Get("config.debug_mode.title"),
+                tooltip: () => _helper.Translation.Get("config.debug_mode.tooltip"),
+                getValue: () => _config.EnableKeepFertilizerAcrossSeason,
+                setValue: value => _config.EnableKeepFertilizerAcrossSeason = value
             );
 
             configMenu.AddSectionTitle(mod: ModManifest,
@@ -290,7 +297,7 @@ namespace UltimateFertilizer {
         }
 
         public static void Print(string msg) {
-            if (DebugMode) {
+            if (_config.DebugMode) {
                 _logger?.Log(msg, LogLevel.Info);
             }
         }
