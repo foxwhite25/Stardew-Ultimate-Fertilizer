@@ -25,7 +25,7 @@ namespace UltimateFertilizer {
             public bool EnableAlwaysFertilizer = true;
             public bool EnableKeepFertilizerAcrossSeason = true;
             public bool ReplaceHighTier = true;
-            public bool DebugMode = false;
+            public bool DebugMode = true;
 
             public byte FertilizerAlpha = 255;
 
@@ -298,7 +298,7 @@ namespace UltimateFertilizer {
 
         public static void Print(string msg) {
             if (_config.DebugMode) {
-                _logger?.Log(msg, LogLevel.Info);
+                _logger?.Log(msg, LogLevel.Debug);
             }
         }
 
@@ -311,14 +311,15 @@ namespace UltimateFertilizer {
 
                 var data = __instance.GetData();
                 var regrow_day = data?.RegrowDays ?? -1;
-                if (regrow_day <= 0)
+                if (regrow_day <= 0) {
                     return;
+                }
                 if (__instance.dayOfCurrentPhase.Value != regrow_day) {
                     return;
                 }
 
                 var speed = soil.GetFertilizerSpeedBoost();
-                __instance.dayOfCurrentPhase.Value = (int) Math.Ceiling(regrow_day / (1.0 + speed));
+                __instance.dayOfCurrentPhase.Value = Math.Max(1, (int) Math.Floor(regrow_day / (1.0 + speed)));
             }
         }
 
@@ -755,31 +756,19 @@ namespace UltimateFertilizer {
         }
 
         private static bool in_harvest;
-        private static bool harvested;
-        private static HoeDirt? current_crop;
-        private static Random? rng;
+        private static int current_quality = -1;
 
         [HarmonyPatch(typeof(Crop), nameof(Crop.harvest))]
         public static class HarvestSentinel {
-            public static void Prefix(
-                int xTile,
-                int yTile, HoeDirt soil
-            ) {
+            public static void Prefix() {
+                Print("In Harvest");
                 in_harvest = true;
-                current_crop = soil;
-                rng = Utility.CreateRandom(
-                    xTile * 7.0,
-                    yTile * 11.0,
-                    Game1.stats.DaysPlayed,
-                    Game1.uniqueIDForThisGame
-                );
             }
 
             public static void Postfix() {
+                Print("Out Harvest");
                 in_harvest = false;
-                harvested = false;
-                current_crop = null;
-                rng = null;
+                current_quality = -1;
             }
         }
 
@@ -796,33 +785,14 @@ namespace UltimateFertilizer {
                     return;
                 }
 
-                if (quality != 0) {
-                    harvested = true;
+                if (current_quality == -1) {
+                    Print("Set fix quality to: " + quality);
+                    current_quality = quality;
                     return;
                 }
-
-                if (!harvested || current_crop == null || rng == null) {
-                    return;
-                }
-
-                var crop = current_crop.crop;
-                var data = crop.GetData();
-                var qualityBoostLevel = current_crop.GetFertilizerQualityBoostLevel();
-                var num1 = 0.2 * (Game1.player.FarmingLevel / 10.0) + 0.2 * qualityBoostLevel *
-                    ((Game1.player.FarmingLevel + 2.0) / 12.0) + 0.01;
-                var num2 = Math.Min(0.75, num1 * 2.0);
-                var num3 = 0;
-                if (qualityBoostLevel >= 3 && rng.NextDouble() < num1 / 2.0)
-                    num3 = 4;
-                else if (rng.NextDouble() < num1)
-                    num3 = 2;
-                else if (rng.NextDouble() < num2 || qualityBoostLevel >= 3)
-                    num3 = 1;
-                var num4 = num3;
-                var harvestMinQuality = data?.HarvestMinQuality ?? 0;
-                var nullable = data?.HarvestMaxQuality;
-                var max = nullable ?? num3;
-                quality = MathHelper.Clamp(num4, harvestMinQuality, max);
+                
+                Print("Apply fixed quality");
+                quality = current_quality;
             }
         }
     }
