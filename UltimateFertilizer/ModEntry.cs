@@ -200,6 +200,13 @@ namespace UltimateFertilizer {
 
             configMenu.AddSectionTitle(mod: ModManifest,
                 text: () => _helper.Translation.Get("config.section.quality_fertilizer"));
+            configMenu.AddBoolOption(
+                mod: ModManifest,
+                name: () => _helper.Translation.Get("config.fix_multi_drop.title"),
+                tooltip: () => _helper.Translation.Get("config.fix_multi_drop.tooltip"),
+                getValue: () => _config.FixMultiDropBug,
+                setValue: value => _config.FixMultiDropBug = value
+            );
             configMenu.AddNumberOption(
                 mod: ModManifest,
                 name: () => _helper.Translation.Get("config.basic_fertilizer_bonus.title"),
@@ -241,13 +248,6 @@ namespace UltimateFertilizer {
                 tooltip: () => _helper.Translation.Get("config.deluxe_fertilizer_amount.tooltip"),
                 getValue: () => _config.FertilizerQualityAmount[2],
                 setValue: value => _config.FertilizerQualityAmount[2] = value
-            );
-            configMenu.AddBoolOption(
-                mod: ModManifest,
-                name: () => _helper.Translation.Get("config.fix_multi_drop.title"),
-                tooltip: () => _helper.Translation.Get("config.fix_multi_drop.tooltip"),
-                getValue: () => _config.FixMultiDropBug,
-                setValue: value => _config.FixMultiDropBug = value
             );
 
             configMenu.AddSectionTitle(mod: ModManifest,
