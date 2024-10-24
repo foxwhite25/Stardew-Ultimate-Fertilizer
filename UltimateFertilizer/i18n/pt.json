@@ -1,0 +1,101 @@
+﻿{
+  "config.section.toggles": "Alterna",
+  
+  "config.fertilizer_mode.title": "Modo de Fertilizante",
+  "config.fertilizer_mode.tooltip.choose": "Escolha o modo de aplicação de seu fertilizante: \n",
+  "config.fertilizer_mode.tooltip.multi-fertilizer-stack": "Permite você misturar diferentes tipos de fertilizantes com variado níveis em uma única colheita espaço.\n",
+  "config.fertilizer_mode.tooltip.multi-fertilizer-single-level": "Permite você misturar diferentes tipos de fertilizantes mas apenas em um único nível em um espaço de colheita.\n",
+  "config.fertilizer_mode.tooltip.single-fertilizer-replace": "Permite você substituir um único tipo de fertilizante em qualquer momento em um espaço de colheita.\n",
+  "config.fertilizer_mode.tooltip.single-fertilizer-stack": "Permite você empilhar um único tipo de fertilizante com diferentes níveis em um espaço de colheita.\n",
+  "config.fertilizer_mode.tooltip.vanilla": "Comportamento padrão fertilizante Stardew Valley.\n",
+  "config.fertilizer_mode.tooltip.note": "Nota: Este configuração apenas aplica-se quando você usa fertilizante.\nSe você tem já fertilizante misturado em um azulejo e então desabilitar esse opção, \nesses blocos ainda funcionarão com a configuração anterior.",
+  "config.fertilizer_mode.option.multi-fertilizer-stack": "Pilha de Multifertilizantes",
+  "config.fertilizer_mode.option.multi-fertilizer-single-level": "Multifertilizante de Nível Único",
+  "config.fertilizer_mode.option.single-fertilizer-replace": "Substituição de Fertilizante Único",
+  "config.fertilizer_mode.option.single-fertilizer-stack": "Pilha de Fertilizante Único",
+  "config.fertilizer_mode.option.vanilla": "Padrão",
+  
+  "config.replace_high_tier.title": "Substituir Fertilizante de Alto Nível",
+  "config.replace_high_tier.tooltip": "Se o modo de substituição pode rebaixar o fertilizante.",
+  
+  "config.enable_fertilizer_anytime.title": "Habilitar Fertilizante a Qualquer Momento",
+  "config.enable_fertilizer_anytime.tooltip": "Permite você para aplicar fertilizante para um espaço de colheita que já tem plantações nele.",
+  
+  "config.keep_fertilizer_across_season.title": "Manter Fertilizante Entre Temporada",
+  "config.keep_fertilizer_across_season.tooltip": "Permitir fertilizantes para não desaparecer entre temporadas.",
+  
+  "config.fertilizer_alpha.title": "Fertilizante Alfa",
+  "config.fertilizer_alpha.tooltip": "Transparência do espírito do fertilizante; padrão 255; intervalo 0-255",
+  
+  "config.debug_mode.title": "Debug Mod",
+  "config.debug_mode.tooltip": "Habilitar saída de depuração para o console",
+  
+  
+  "config.section.speed_fertilizer": "Fertilizante de Velocidade",
+  
+  "config.affect_multi_harvest.title": "Afeta Multi-Colheita",
+  "config.affect_multi_harvest.tooltip": "Se a velocidade do fertilizante permanece ativo depois da primeira colheita em multi-colheitas (exemplo: fruta antiga).",
+  
+  "config.speed_gro_bonus.title": "Solo Foliar Bônus",
+  "config.speed_gro_bonus.tooltip": "Modificar o velocidade bônus de Solo Foliar; padrão 10% (0.1)",
+  
+  "config.deluxe_speed_gro_bonus.title": "Solo Foliar Preminum",
+  "config.deluxe_speed_gro_bonus.tooltip": "Modificar o velocidade bônus de Solo Foliar Preminum; padrão 25% (0.25)",
+  
+  "config.hyper_speed_gro_bonus.title": "Hiper Solo Foliar Bônus",
+  "config.hyper_speed_gro_bonus.tooltip": "Modificar o velocidade bônus de Hiper Solo Foliar ; padrão 33% (0.33)",
+  
+  "config.speed_gro_amount.title": "Solo Foliar Quantidade",
+  "config.speed_gro_amount.tooltip": "Modificar o quantia de Solo Foliar obtido ao criar; padrão 5",
+  
+  "config.deluxe_speed_gro_amount.title": "Solo Foliar Preminum Quantidade",
+  "config.deluxe_speed_gro_amount.tooltip": "Modificar o quantia de Solo Foliar Preminum obtido ao criar; padrão 5",
+  
+  "config.hyper_speed_gro_amount.title": "Hiper Solo Foliar Quantidade",
+  "config.hyper_speed_gro_amount.tooltip": "Modificar o quantia de Hiper Solo Foliar obtido ao criar; padrão 1",
+  
+  
+  "config.section.quality_fertilizer": "Fertilizante de Qualidade",
+  
+  "config.fix_multi_drop.title": "Corrigir Bug Multi Drop",
+  "config.fix_multi_drop.tooltip": "No padrão, apenas o primeiro pedaço de plantações multi drops colhidos vai pegar o bônus.\nEste patch corrige esse bug e o torna assim que todo derrubar seria ter o mesmo qualidade como o primeiro.",
+  
+  "config.basic_fertilizer_bonus.title": "Fertilizante Básico Bônus",
+  "config.basic_fertilizer_bonus.tooltip": "Modificar o qualidade bônus de Fertilizante Básico; padrão 1",
+  
+  "config.quality_fertilizer_bonus.title": "Fertilizante de Qualidade Bônus",
+  "config.quality_fertilizer_bonus.tooltip": "Modificar o qualidade bônus de Fertilizante de Qualidade; padrão 2",
+  
+  "config.deluxe_fertilizer_bonus.title": "Fertilizante Preminum Bônus",
+  "config.deluxe_fertilizer_bonus.tooltip": "Modificar o qualidade bônus de Fertilizante Preminum; padrão 3",
+  
+  "config.basic_fertilizer_amount.title": "Fertilizante Básico Quantidade",
+  "config.basic_fertilizer_amount.tooltip": "Modificar o quantia de Fertilizante Básico obtido ao criar; padrão 1",
+  
+  "config.quality_fertilizer_amount.title": "Fertilizante de Qualidade Quantidade",
+  "config.quality_fertilizer_amount.tooltip": "Modificar o quantia de Fertilizante de Qualidade obtido ao criar; padrão 2",
+  
+  "config.deluxe_fertilizer_amount.title": "Fertilizante Preminum Quantidade",
+  "config.deluxe_fertilizer_amount.tooltip": "Modificar o quantia de Fertilizante Preminum obtido ao criar; padrão 5",
+  
+  
+  "config.section.water_fertilizer": "Fertilizante de Água",
+  
+  "config.basic_retaining_soil_bonus.title": "Solo Retentor Básico Bônus",
+  "config.basic_retaining_soil_bonus.tooltip": "Modifica a chance de continuar úmido com Solo Retentor Básico; padrão 33% (0.33)",
+  
+  "config.quality_retaining_soil_bonus.title": "Solo Retentor de Qualidade Bônus",
+  "config.quality_retaining_soil_bonus.tooltip": "Modifica a chance de continuar úmido com Solo Retentor de Qualidade; padrão 66% (0.66)",
+  
+  "config.deluxe_retaining_soil_bonus.title": "Solo Retentor Premium Bônus",
+  "config.deluxe_retaining_soil_bonus.tooltip": "Modifica a chance de continuar úmido com Solo Retentor Premium; padrão 100% (1.0)",
+  
+  "config.basic_retaining_soil_amount.title": "Solo Retentor Básico Quantidade",
+  "config.basic_retaining_soil_amount.tooltip": "Modificar o quantia de Solo Retentor Básico obtido ao criar; padrão 1",
+  
+  "config.quality_retaining_soil_amount.title": "Solo Retentor de Qualidade Quantidade",
+  "config.quality_retaining_soil_amount.tooltip": "Modificar o quantia de Solo Retentor de Qualidade obtido ao criar; padrão 2",
+  
+  "config.deluxe_retaining_soil_amount.title": "Solo Retentor Premium Quantidade",
+  "config.deluxe_retaining_soil_amount.tooltip": "Modificar o quantia de Solo Retentor Premium obtido ao criar; padrão 1"
+}
