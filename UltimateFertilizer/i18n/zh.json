@@ -31,6 +31,21 @@
   "config.debug_mode.tooltip": "启用调试输出到控制台",
 
 
+  "config.section.fruit_tree": "果树施用树木肥料",
+
+  "config.fruit_tree_enable.title": "对果树启用",
+  "config.fruit_tree_enable.tooltip": "允许将树木肥料（用于野生树木的那种）也施用于果树。原版游戏会完全忽略果树。",
+
+  "config.fruit_tree_grow_anywhere.title": "随处种植与生长",
+  "config.fruit_tree_grow_anywhere.tooltip": "果树将忽略周围空间限制：树苗可以种在拥挤的位置（紧挨其他树木、物体、道路或作物），并能在那里继续生长。需要启用“对果树启用”。",
+
+  "config.fruit_tree_mature_boost.title": "施用时成熟度削减 (%)",
+  "config.fruit_tree_mature_boost.tooltip": "为果树施肥时，立即按此百分比减少其剩余成熟天数。50 = 剩余时间减半（剩 14 天的树变为 7 天）。100 = 立即成熟。0 = 无即时效果。",
+
+  "config.fruit_tree_growth_rate.title": "持续成熟速度",
+  "config.fruit_tree_growth_rate.tooltip": "额外：已施肥的果树在上面的一次性削减之外，每天额外获得的成熟天数。1 = 原版速度（关闭）。2 = 之后成熟速度翻倍。最高 7。若只想要一次性削减，请保持为 1。",
+
+
   "config.section.speed_fertilizer": "生长激素",
 
   "config.affect_multi_harvest.title": "影响多次收获",

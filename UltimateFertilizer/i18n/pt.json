@@ -29,8 +29,23 @@
   
   "config.debug_mode.title": "Debug Mod",
   "config.debug_mode.tooltip": "Habilitar saída de depuração para o console",
-  
-  
+
+
+  "config.section.fruit_tree": "Fertilizante de Árvore em Árvores Frutíferas",
+
+  "config.fruit_tree_enable.title": "Ativar em Árvores Frutíferas",
+  "config.fruit_tree_enable.tooltip": "Permite aplicar o Fertilizante de Árvore (o das árvores selvagens) também em árvores frutíferas. O jogo base ignora árvores frutíferas.",
+
+  "config.fruit_tree_grow_anywhere.title": "Plantar e Crescer em Qualquer Lugar",
+  "config.fruit_tree_grow_anywhere.tooltip": "Árvores frutíferas ignoram a regra de espaço ao redor: mudas podem ser plantadas em locais apertados (ao lado de outras árvores, objetos, caminhos ou plantações) e continuam crescendo ali. Requer 'Ativar em Árvores Frutíferas'.",
+
+  "config.fruit_tree_mature_boost.title": "Corte de Maturação ao Aplicar (%)",
+  "config.fruit_tree_mature_boost.tooltip": "Ao fertilizar uma árvore frutífera, reduz imediatamente os dias restantes para amadurecer nesta porcentagem. 50 = corta pela metade o tempo restante (uma árvore com 14 dias passa para 7). 100 = amadurece na hora. 0 = sem efeito imediato.",
+
+  "config.fruit_tree_growth_rate.title": "Taxa de Maturação Contínua",
+  "config.fruit_tree_growth_rate.tooltip": "Extra: dias de maturação que uma árvore frutífera fertilizada ganha A CADA dia, além do corte único acima. 1 = velocidade normal (desligado). 2 = amadurece duas vezes mais rápido daqui em diante. Até 7. Deixe em 1 se quiser apenas o corte único.",
+
+
   "config.section.speed_fertilizer": "Fertilizante de Velocidade",
   
   "config.affect_multi_harvest.title": "Afeta Multi-Colheita",

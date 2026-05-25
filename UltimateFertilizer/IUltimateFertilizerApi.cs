@@ -21,4 +21,13 @@ public interface IUltimateFertilizerApi {
     /// <param name="itemIds">A collection of fertilizer itemIds that are considered same type.</param>
     /// <remarks>The fertilizer should be tiered from low to high.</remarks>
     void RegisterFertilizerType(IEnumerable<string> itemIds);
+
+    /// <summary>Apply Tree Fertilizer to a fruit tree (the vanilla game ignores fruit trees).</summary>
+    /// <param name="tree">The fruit tree instance.</param>
+    /// <returns>Whether the fruit tree was fertilized (false if it was already fertilized or fully grown).</returns>
+    bool FertilizeFruitTree(FruitTree tree);
+
+    /// <summary>Check whether a fruit tree has been fertilized by this mod.</summary>
+    /// <param name="tree">The fruit tree instance.</param>
+    bool IsFruitTreeFertilized(FruitTree tree);
 }

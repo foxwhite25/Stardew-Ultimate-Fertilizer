@@ -31,6 +31,21 @@
   "config.debug_mode.tooltip": "Enable debug output to console",
 
 
+  "config.section.fruit_tree": "Tree Fertilizer on Fruit Trees",
+
+  "config.fruit_tree_enable.title": "Enable on Fruit Trees",
+  "config.fruit_tree_enable.tooltip": "Allow Tree Fertilizer (the wild-tree one) to also be applied to fruit trees. Vanilla ignores fruit trees entirely.",
+
+  "config.fruit_tree_grow_anywhere.title": "Plant & Grow Anywhere",
+  "config.fruit_tree_grow_anywhere.tooltip": "Fruit trees ignore the surrounding-clearance rule: saplings can be planted in crowded spots (next to other trees, objects, paths or crops) and keep growing there. Requires 'Enable on Fruit Trees'.",
+
+  "config.fruit_tree_mature_boost.title": "Maturity Cut on Apply (%)",
+  "config.fruit_tree_mature_boost.tooltip": "When you fertilize a fruit tree, immediately reduce its remaining days-to-mature by this percent. 50 = cut the remaining time in half (a tree with 14 days left jumps to 7). 100 = mature instantly. 0 = no immediate effect.",
+
+  "config.fruit_tree_growth_rate.title": "Ongoing Maturation Rate",
+  "config.fruit_tree_growth_rate.tooltip": "Extra: days of maturity a fertilized fruit tree gains EACH day, on top of the one-time cut above. 1 = vanilla speed (off). 2 = matures twice as fast going forward. Up to 7. Leave at 1 if you only want the one-time cut.",
+
+
   "config.section.speed_fertilizer": "Speed Fertilizer",
   
   "config.affect_multi_harvest.title": "Affect Multi-Harvest",

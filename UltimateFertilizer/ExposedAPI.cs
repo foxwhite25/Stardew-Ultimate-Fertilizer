@@ -15,4 +15,12 @@ public class ExposedApi : IUltimateFertilizerApi {
     public void RegisterFertilizerType(IEnumerable<string> itemIds) {
         ModEntry.Fertilizers.Add(itemIds.ToList());
     }
+
+    public bool FertilizeFruitTree(FruitTree tree) {
+        return ModEntry.FruitTreeSupport.Fertilize(tree);
+    }
+
+    public bool IsFruitTreeFertilized(FruitTree tree) {
+        return ModEntry.FruitTreeSupport.IsFertilized(tree);
+    }
 }
