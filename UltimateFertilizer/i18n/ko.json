@@ -31,6 +31,21 @@
   "config.debug_mode.tooltip": "콘솔에 디버그 출력 활성화",
 
 
+  "config.section.fruit_tree": "과일나무에 나무 비료 적용",
+
+  "config.fruit_tree_enable.title": "과일나무에 적용",
+  "config.fruit_tree_enable.tooltip": "나무 비료(야생 나무용)를 과일나무에도 사용할 수 있게 합니다. 기본 게임은 과일나무를 무시합니다.",
+
+  "config.fruit_tree_grow_anywhere.title": "어디서나 심고 성장",
+  "config.fruit_tree_grow_anywhere.tooltip": "과일나무가 주변 공간 규칙을 무시합니다: 묘목을 비좁은 곳(다른 나무, 물건, 길, 작물 옆)에도 심을 수 있고 그곳에서 계속 자랍니다. '과일나무에 적용'이 필요합니다.",
+
+  "config.fruit_tree_mature_boost.title": "적용 시 성숙 단축 (%)",
+  "config.fruit_tree_mature_boost.tooltip": "과일나무에 비료를 주면 성숙까지 남은 일수를 이 비율만큼 즉시 줄입니다. 50 = 남은 시간을 절반으로 (14일 남은 나무가 7일로). 100 = 즉시 성숙. 0 = 즉시 효과 없음.",
+
+  "config.fruit_tree_growth_rate.title": "지속 성숙 속도",
+  "config.fruit_tree_growth_rate.tooltip": "추가: 비료를 준 과일나무가 위의 일회성 단축에 더해 매일 얻는 성숙 일수. 1 = 기본 속도(꺼짐). 2 = 이후 두 배 빠르게 성숙. 최대 7. 일회성 단축만 원하면 1로 두세요.",
+
+
   "config.section.speed_fertilizer": "성장 촉진제",
   
   "config.affect_multi_harvest.title": "다수 수확에 영향 주기",

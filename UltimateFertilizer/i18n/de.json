@@ -31,6 +31,21 @@
   "config.debug_mode.tooltip": "Aktiviere Debug-Ausgabe zur Konsole",
 
 
+  "config.section.fruit_tree": "Baumdünger auf Obstbäumen",
+
+  "config.fruit_tree_enable.title": "Bei Obstbäumen aktivieren",
+  "config.fruit_tree_enable.tooltip": "Erlaubt, Baumdünger (den für Wildbäume) auch auf Obstbäume anzuwenden. Im Originalspiel werden Obstbäume ignoriert.",
+
+  "config.fruit_tree_grow_anywhere.title": "Überall pflanzen & wachsen",
+  "config.fruit_tree_grow_anywhere.tooltip": "Obstbäume ignorieren die Abstandsregel: Setzlinge können an beengten Stellen gepflanzt werden (neben anderen Bäumen, Objekten, Wegen oder Pflanzen) und wachsen dort weiter. Erfordert 'Bei Obstbäumen aktivieren'.",
+
+  "config.fruit_tree_mature_boost.title": "Reife-Sprung bei Anwendung (%)",
+  "config.fruit_tree_mature_boost.tooltip": "Reduziert beim Düngen eines Obstbaums sofort die verbleibenden Tage bis zur Reife um diesen Prozentsatz. 50 = halbiert die verbleibende Zeit (ein Baum mit 14 Tagen springt auf 7). 100 = sofort reif. 0 = kein Soforteffekt.",
+
+  "config.fruit_tree_growth_rate.title": "Laufende Reifegeschwindigkeit",
+  "config.fruit_tree_growth_rate.tooltip": "Extra: Reifetage, die ein gedüngter Obstbaum JEDEN Tag zusätzlich zum einmaligen Sprung oben gewinnt. 1 = normale Geschwindigkeit (aus). 2 = reift künftig doppelt so schnell. Bis zu 7. Bei 1 lassen, wenn nur der einmalige Sprung gewünscht ist.",
+
+
   "config.section.speed_fertilizer": "Geschwindigkeits Dünger",
   
   "config.affect_multi_harvest.title": "Betrifft Pflanzen mit mehreren Ernten",

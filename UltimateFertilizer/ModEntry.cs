@@ -40,6 +40,17 @@ namespace UltimateFertilizer {
 
             public List<float> FertilizerWaterRetentionBoost = new() {0.33f, 0.66f, 1.0f};
             public List<int> FertilizerWaterRetentionAmount = new() {1, 2, 1};
+
+            // Tree Fertilizer on fruit trees (vanilla ignores fruit trees entirely).
+            public bool EnableFruitTreeFertilizer = true;
+            public bool FruitTreeGrowAnywhere = true;
+
+            // On application, immediately reduce the tree's remaining days-to-mature by
+            // this percentage (50 = cut the remaining time in half). 0 disables it.
+            public int FruitTreeMatureBoostPercent = 50;
+
+            // Optional ongoing per-day maturity gain (1 = vanilla speed; off by default).
+            public int FruitTreeGrowthRate = 1;
         }
 
         private static Config _config = null!;
@@ -144,6 +155,42 @@ namespace UltimateFertilizer {
                 tooltip: () => _helper.Translation.Get("config.debug_mode.tooltip"),
                 getValue: () => _config.PrintDebugMode,
                 setValue: value => _config.PrintDebugMode = value
+            );
+
+            configMenu.AddSectionTitle(mod: ModManifest,
+                text: () => _helper.Translation.Get("config.section.fruit_tree"));
+            configMenu.AddBoolOption(
+                mod: ModManifest,
+                name: () => _helper.Translation.Get("config.fruit_tree_enable.title"),
+                tooltip: () => _helper.Translation.Get("config.fruit_tree_enable.tooltip"),
+                getValue: () => _config.EnableFruitTreeFertilizer,
+                setValue: value => _config.EnableFruitTreeFertilizer = value
+            );
+            configMenu.AddBoolOption(
+                mod: ModManifest,
+                name: () => _helper.Translation.Get("config.fruit_tree_grow_anywhere.title"),
+                tooltip: () => _helper.Translation.Get("config.fruit_tree_grow_anywhere.tooltip"),
+                getValue: () => _config.FruitTreeGrowAnywhere,
+                setValue: value => _config.FruitTreeGrowAnywhere = value
+            );
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => _helper.Translation.Get("config.fruit_tree_mature_boost.title"),
+                tooltip: () => _helper.Translation.Get("config.fruit_tree_mature_boost.tooltip"),
+                getValue: () => _config.FruitTreeMatureBoostPercent,
+                setValue: value => _config.FruitTreeMatureBoostPercent = Math.Max(0, Math.Min(value, 100)),
+                min: 0,
+                max: 100,
+                interval: 5
+            );
+            configMenu.AddNumberOption(
+                mod: ModManifest,
+                name: () => _helper.Translation.Get("config.fruit_tree_growth_rate.title"),
+                tooltip: () => _helper.Translation.Get("config.fruit_tree_growth_rate.tooltip"),
+                getValue: () => _config.FruitTreeGrowthRate,
+                setValue: value => _config.FruitTreeGrowthRate = Math.Max(1, Math.Min(value, 7)),
+                min: 1,
+                max: 7
             );
 
             configMenu.AddSectionTitle(mod: ModManifest,
@@ -299,6 +346,255 @@ namespace UltimateFertilizer {
         public static void Print(string msg) {
             if (_config.PrintDebugMode) {
                 _logger?.Log(msg, LogLevel.Debug);
+            }
+        }
+
+        /// <summary>Tree Fertilizer support for fruit trees (vanilla only fertilizes wild trees).</summary>
+        public static class FruitTreeSupport {
+            public const string ModDataKey = "fox_white25.ultimate_fertilizer/TreeFertilized";
+            public const string TreeFertilizerQID = "(O)805";
+
+            public enum HandleResult {
+                /// <summary>Not a fertilizable target / feature disabled — let vanilla handle the click.</summary>
+                NotApplicable,
+                /// <summary>The tree was just fertilized on this click.</summary>
+                Fertilized,
+                /// <summary>Rejected (already fertilized); feedback shown.</summary>
+                Rejected,
+                /// <summary>Already processed earlier in the same click; do nothing.</summary>
+                AlreadyHandled
+            }
+
+            // Per-click dedupe: a single click can route through performUseAction and
+            // placementAction (sometimes more than once). We only want to act once.
+            private static Vector2 _lastTile = new(float.MinValue, float.MinValue);
+            private static int _lastTick = int.MinValue;
+
+            public static bool IsFertilized(FruitTree tree) {
+                return tree.modData.TryGetValue(ModDataKey, out var value) && value == "true";
+            }
+
+            /// <summary>Apply the fertilized state and the immediate maturity cut. No UI/sound.</summary>
+            private static void ApplyFertilizer(FruitTree tree) {
+                tree.modData[ModDataKey] = "true";
+
+                // Immediately cut the remaining time-to-mature (default: halve it).
+                var pct = Math.Clamp(_config.FruitTreeMatureBoostPercent, 0, 100);
+                if (pct > 0 && tree.daysUntilMature.Value > 0) {
+                    var newDays = (int) Math.Ceiling(tree.daysUntilMature.Value * (1.0 - pct / 100.0));
+                    tree.daysUntilMature.Value = newDays;
+                    tree.growthStage.Value = FruitTree.DaysUntilMatureToGrowthStage(newDays);
+                }
+
+                Print($"Fruit tree fertilized at {tree.Tile}; daysUntilMature now {tree.daysUntilMature.Value}");
+            }
+
+            /// <summary>
+            /// API helper: mark a fruit tree fertilized (no UI). Mirrors <see cref="Tree.fertilize"/>
+            /// rejection rules. Returns true if it was newly fertilized.
+            /// </summary>
+            public static bool Fertilize(FruitTree tree) {
+                if (tree.growthStage.Value >= FruitTree.treeStage || IsFertilized(tree)) {
+                    return false;
+                }
+
+                ApplyFertilizer(tree);
+                return true;
+            }
+
+            /// <summary>
+            /// Handle a click on a fruit tree while holding Tree Fertilizer. Deduped so the
+            /// multiple dispatch paths for one click only take effect once.
+            /// </summary>
+            public static HandleResult HandleInteraction(FruitTree tree) {
+                if (!_config.EnableFruitTreeFertilizer) {
+                    return HandleResult.NotApplicable;
+                }
+
+                // Fully grown: nothing to fertilize — let vanilla shake/harvest happen.
+                if (tree.growthStage.Value >= FruitTree.treeStage) {
+                    return HandleResult.NotApplicable;
+                }
+
+                var tile = tree.Tile;
+                if (_lastTile == tile && Game1.ticks - _lastTick <= 1) {
+                    return HandleResult.AlreadyHandled;
+                }
+
+                _lastTile = tile;
+                _lastTick = Game1.ticks;
+
+                if (IsFertilized(tree)) {
+                    Game1.showRedMessageUsingLoadString("Strings\\StringsFromCSFiles:TreeFertilizer2");
+                    tree.Location?.playSound("cancel");
+                    return HandleResult.Rejected;
+                }
+
+                ApplyFertilizer(tree);
+                tree.Location?.playSound("dirtyHit");
+                return HandleResult.Fertilized;
+            }
+        }
+
+        /// <summary>
+        /// A fruit tree consumes the click to shake itself (performUseAction returns true),
+        /// which happens before placement logic. When the player is holding Tree Fertilizer
+        /// and the tree can be fertilized, take over the click here instead of shaking.
+        /// This is the path that actually fires for left-click / use-tool-button.
+        /// </summary>
+        [HarmonyPatch(typeof(FruitTree), nameof(FruitTree.performUseAction))]
+        public static class FruitTreeUseAction {
+            public static bool Prefix(FruitTree __instance, ref bool __result) {
+                if (!_config.EnableFruitTreeFertilizer) {
+                    return true;
+                }
+
+                var who = Game1.player;
+                var active = who?.ActiveObject;
+                if (who == null || active == null || active.QualifiedItemId != FruitTreeSupport.TreeFertilizerQID) {
+                    return true;
+                }
+
+                // Fully grown: let vanilla handle it (shake / harvest fruit).
+                if (__instance.growthStage.Value >= FruitTree.treeStage) {
+                    return true;
+                }
+
+                var result = FruitTreeSupport.HandleInteraction(__instance);
+                if (result == FruitTreeSupport.HandleResult.NotApplicable) {
+                    return true;
+                }
+
+                if (result == FruitTreeSupport.HandleResult.Fertilized) {
+                    who.reduceActiveItemByOne();
+                }
+
+                __result = true; // click handled; don't shake
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Controller / right-click "place item" path: the click reaches placementAction
+        /// instead of performUseAction. Handle Tree Fertilizer on a fruit tree here too.
+        /// </summary>
+        [HarmonyPatch(typeof(Object), nameof(Object.placementAction))]
+        public static class FruitTreeFertilizerPlacement {
+            public static void Postfix(Object __instance, GameLocation location, int x, int y, ref bool __result) {
+                if (__result || !_config.EnableFruitTreeFertilizer) {
+                    return;
+                }
+
+                if (__instance.QualifiedItemId != FruitTreeSupport.TreeFertilizerQID || location == null) {
+                    return;
+                }
+
+                var tile = new Vector2(x / 64, y / 64);
+                if (location.terrainFeatures.GetValueOrDefault(tile) is not FruitTree fruitTree) {
+                    return;
+                }
+
+                if (fruitTree.growthStage.Value >= FruitTree.treeStage) {
+                    return;
+                }
+
+                // Only signal success (which makes the game consume one Tree Fertilizer)
+                // when we actually fertilized on this click. Rejected / already-handled
+                // leave __result false so the item isn't consumed.
+                if (FruitTreeSupport.HandleInteraction(fruitTree) == FruitTreeSupport.HandleResult.Fertilized) {
+                    __result = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Allow Tree Fertilizer (O)805 to be placed on a fruit-tree tile. Vanilla's
+        /// canBePlacedHere only returns true when the tile holds a wild <see cref="Tree"/>,
+        /// so without this the click is rejected (red tile) and placementAction never runs.
+        /// </summary>
+        [HarmonyPatch(typeof(Object), nameof(Object.canBePlacedHere))]
+        public static class FruitTreeFertilizerPlaceable {
+            public static void Postfix(Object __instance, GameLocation l, Vector2 tile, ref bool __result) {
+                if (__result || !_config.EnableFruitTreeFertilizer) {
+                    return;
+                }
+
+                if (__instance.QualifiedItemId != "(O)805" || l == null) {
+                    return;
+                }
+
+                // Mirror vanilla's wild-tree behaviour: allow placement over any fruit tree;
+                // the "already fertilized / too grown" rejection is handled in placementAction.
+                if (l.terrainFeatures.GetValueOrDefault(tile) is FruitTree) {
+                    __result = true;
+                }
+            }
+        }
+
+        /// <summary>True when the player is currently holding a fruit-tree sapling, i.e. these
+        /// clearance checks are running for a placement attempt rather than overnight growth.</summary>
+        private static bool IsPlacingFruitTreeSapling() {
+            return _config.EnableFruitTreeFertilizer
+                   && _config.FruitTreeGrowAnywhere
+                   && Game1.player?.ActiveObject?.IsFruitTreeSapling() == true;
+        }
+
+        /// <summary>
+        /// Fruit trees ignore the surrounding-clearance requirement entirely when "grow anywhere"
+        /// is on. Vanilla calls this both at placement (canBePlacedHere / placementAction) and
+        /// during overnight growth (dayUpdate), so neutralizing it here lets saplings be planted
+        /// in crowded spots *and* keeps them growing there afterwards.
+        /// </summary>
+        [HarmonyPatch(typeof(FruitTree), nameof(FruitTree.IsGrowthBlocked))]
+        public static class FruitTreeGrowthBlocked {
+            public static bool Prefix(ref bool __result) {
+                if (!_config.EnableFruitTreeFertilizer || !_config.FruitTreeGrowAnywhere) {
+                    return true;
+                }
+
+                __result = false; // never blocked by crowding
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Let fruit-tree saplings be planted right next to other trees. Vanilla rejects placement
+        /// within 2 tiles of any tree via IsTooCloseToAnotherTree; bypass it while the player is
+        /// holding a sapling and "grow anywhere" is on.
+        /// </summary>
+        [HarmonyPatch(typeof(FruitTree), nameof(FruitTree.IsTooCloseToAnotherTree))]
+        public static class FruitTreeTooClose {
+            public static bool Prefix(ref bool __result) {
+                if (!IsPlacingFruitTreeSapling()) {
+                    return true;
+                }
+
+                __result = false;
+                return false;
+            }
+        }
+
+        /// <summary>Speed up maturation of fertilized fruit trees by temporarily raising their growth rate.</summary>
+        [HarmonyPatch(typeof(FruitTree), nameof(FruitTree.dayUpdate))]
+        public static class FruitTreeDayUpdate {
+            public static void Prefix(FruitTree __instance, out int __state) {
+                __state = int.MinValue;
+                if (!_config.EnableFruitTreeFertilizer || _config.FruitTreeGrowthRate <= 1) {
+                    return;
+                }
+
+                if (__instance.growthStage.Value >= FruitTree.treeStage || !FruitTreeSupport.IsFertilized(__instance)) {
+                    return;
+                }
+
+                __state = __instance.growthRate.Value;
+                __instance.growthRate.Value = _config.FruitTreeGrowthRate;
+            }
+
+            public static void Postfix(FruitTree __instance, int __state) {
+                if (__state != int.MinValue) {
+                    __instance.growthRate.Value = __state;
+                }
             }
         }
 
